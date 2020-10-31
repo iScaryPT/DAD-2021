@@ -437,11 +437,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\Proj\\Project\\Client\\Client.csproj",
+      "projectUniqueName": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Client\\Client.csproj",
       "projectName": "Client",
-      "projectPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\Proj\\Project\\Client\\Client.csproj",
+      "projectPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Client\\Client.csproj",
       "packagesPath": "C:\\Users\\pedro\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\Proj\\Project\\Client\\obj\\",
+      "outputPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Client\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\pedro\\AppData\\Roaming\\NuGet\\NuGet.Config",

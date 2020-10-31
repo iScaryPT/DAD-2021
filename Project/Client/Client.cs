@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+using ClientLogicSP;
 using ConfigStorageSP;
 
 namespace ClientSP
@@ -9,12 +10,14 @@ namespace ClientSP
     class Client
     {
 
+        private ClientLogic client;
         private readonly ConfigStorage config;
         private bool is_repeating = false;
         private int repeat_num = 1;
 
         public Client(string configFile) {
             config = new ConfigStorage(configFile);
+            client = new ClientLogic(config.findMServerByPartition(1), config);
         }
 
         public int repeatNum()
@@ -36,7 +39,7 @@ namespace ClientSP
                 int partitionId = int.Parse(commandArgs[1]);
                 int objectId = int.Parse(commandArgs[2]);
                 int serverId = int.Parse(commandArgs[3]);
-                //Call some function
+                Console.WriteLine(client.Read(partitionId, objectId, serverId));
             }
             catch (FormatException e)
             {
@@ -63,8 +66,7 @@ namespace ClientSP
                 for (var i = 3; i < commandArgs.Length; i++)
                     value += commandArgs[i] + (i == commandArgs.Length - 1 ? "" : " ");
                 value = value.Replace("\"", "");
-                //Console.WriteLine(value);
-                //Call some function
+                Console.WriteLine(client.Write(partitionId, objectId, value));
             }
             catch (FormatException e)
             {

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\Proj\\Project\\ConsoleApp1\\Server.csproj": {}
+    "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\ConsoleApp1\\Server.csproj": {}
   },
   "projects": {
-    "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\Proj\\Project\\ConsoleApp1\\Server.csproj": {
+    "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\ConsoleApp1\\Server.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\Proj\\Project\\ConsoleApp1\\Server.csproj",
+        "projectUniqueName": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\ConsoleApp1\\Server.csproj",
         "projectName": "Server",
-        "projectPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\Proj\\Project\\ConsoleApp1\\Server.csproj",
+        "projectPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\ConsoleApp1\\Server.csproj",
         "packagesPath": "C:\\Users\\pedro\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\Proj\\Project\\ConsoleApp1\\obj\\",
+        "outputPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\ConsoleApp1\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\pedro\\AppData\\Roaming\\NuGet\\NuGet.Config",

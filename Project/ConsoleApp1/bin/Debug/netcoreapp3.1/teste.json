@@ -1,0 +1,15 @@
+{
+  "Servers": [
+    {
+      "Taken": 1,
+      "Id": 0,
+      "Url": "http://localhost:1000",
+      "Partitions": [
+        1
+      ],
+      "Master": [
+        1
+      ]
+    }
+  ]
+}

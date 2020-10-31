@@ -32,6 +32,7 @@ namespace ServerSP
                 }
             }
 
+            Console.WriteLine("Vou mandar isto: " + res);
             return Task.FromResult(new ReadReply
             {
                 ObjectValue = res

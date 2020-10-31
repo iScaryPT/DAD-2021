@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "PTxGhZXbLKqU1KDntLv6A8pZs0eB618dhBnsYLWAZi+D2kaJhG79WVNXFMBmJXnF3efU8u8i6hp9FcYZjrjqew==",
+  "dgSpecHash": "Mv1JrZMRByUpVI2xOwpYACltjLvRrUoVnSw21aofLl5+YO6qkT8BXlX5oi/h6daVu1vVxWXF6fZ+jcgSZKGFqg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\Proj\\Project\\ConsoleApp1\\Server.csproj",
+  "projectFilePath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\ConsoleApp1\\Server.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\pedro\\.nuget\\packages\\google.protobuf\\3.13.0\\google.protobuf.3.13.0.nupkg.sha512",
     "C:\\Users\\pedro\\.nuget\\packages\\grpc.core\\2.33.1\\grpc.core.2.33.1.nupkg.sha512",
