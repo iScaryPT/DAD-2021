@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "dgSpecHash": "PTxGhZXbLKqU1KDntLv6A8pZs0eB618dhBnsYLWAZi+D2kaJhG79WVNXFMBmJXnF3efU8u8i6hp9FcYZjrjqew==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\Proj\\Project\\ConsoleApp1\\Server.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\pedro\\.nuget\\packages\\google.protobuf\\3.13.0\\google.protobuf.3.13.0.nupkg.sha512",
+    "C:\\Users\\pedro\\.nuget\\packages\\grpc.core\\2.33.1\\grpc.core.2.33.1.nupkg.sha512",
+    "C:\\Users\\pedro\\.nuget\\packages\\grpc.core.api\\2.33.1\\grpc.core.api.2.33.1.nupkg.sha512",
+    "C:\\Users\\pedro\\.nuget\\packages\\grpc.tools\\2.33.1\\grpc.tools.2.33.1.nupkg.sha512",
+    "C:\\Users\\pedro\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512",
+    "C:\\Users\\pedro\\.nuget\\packages\\system.memory\\4.5.3\\system.memory.4.5.3.nupkg.sha512",
+    "C:\\Users\\pedro\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\4.5.2\\system.runtime.compilerservices.unsafe.4.5.2.nupkg.sha512"
+  ],
+  "logs": []
+}

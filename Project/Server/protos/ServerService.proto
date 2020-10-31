@@ -1,0 +1,25 @@
+﻿syntax = "proto3";
+
+service ServerService {
+  rpc Read (ReadRequest) returns (ReadReply);
+  rpc Write (WriteRequest) returns (WriteReply);
+}
+
+message ReadRequest {
+	int32 partitionId = 1;
+	int32 objectId = 2;
+}
+
+message ReadReply {
+	string objectValue = 1;
+}
+
+message WriteRequest {
+	int32 partitionId = 1;
+	int32 objectId = 2;
+	string objectValue = 3;
+}
+
+message WriteReply {
+	bool ok = 1;
+}
