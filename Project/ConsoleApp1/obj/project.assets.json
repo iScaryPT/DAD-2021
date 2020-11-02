@@ -312,19 +312,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\pedro\\.nuget\\packages\\": {}
+    "C:\\Users\\heteronimo\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\ConsoleApp1\\Server.csproj",
+      "projectUniqueName": "C:\\Users\\heteronimo\\Documents\\GitHub\\DAD-2021\\Project\\ConsoleApp1\\Server.csproj",
       "projectName": "Server",
-      "projectPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\ConsoleApp1\\Server.csproj",
-      "packagesPath": "C:\\Users\\pedro\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\ConsoleApp1\\obj\\",
+      "projectPath": "C:\\Users\\heteronimo\\Documents\\GitHub\\DAD-2021\\Project\\ConsoleApp1\\Server.csproj",
+      "packagesPath": "C:\\Users\\heteronimo\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\heteronimo\\Documents\\GitHub\\DAD-2021\\Project\\ConsoleApp1\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\pedro\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\heteronimo\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [

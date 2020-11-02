@@ -6,7 +6,7 @@ service ServerService {
 }
 
 message ReadRequest {
-	int32 partitionId = 1;
+	string partitionId = 1;
 	int32 objectId = 2;
 }
 
@@ -15,7 +15,7 @@ message ReadReply {
 }
 
 message WriteRequest {
-	int32 partitionId = 1;
+	string partitionId = 1;
 	int32 objectId = 2;
 	string objectValue = 3;
 }

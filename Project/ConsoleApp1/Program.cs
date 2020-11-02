@@ -13,7 +13,7 @@ namespace ServerSP
     class ServerServices : ServerService.ServerServiceBase
     {
 
-        Dictionary<(int, int), string> dataStorage = new Dictionary<(int, int), string>();
+        Dictionary<(string, int), string> dataStorage = new Dictionary<(string, int), string>();
 
         public ServerServices() { }
 
@@ -80,9 +80,14 @@ namespace ServerSP
             {
                 if(server["Taken"].ToObject<int>() == 0)
                 {
-                    config.takeServer(server["Id"].ToObject<int>());
+                    Console.WriteLine("taken == 0");
+                    config.takeServer(server["Id"].ToString());
                     return server;
+                    
                 }
+                Console.WriteLine(server["Taken"].ToObject<int>());
+                Console.WriteLine("taken != 0");
+                Console.ReadLine();
             }
             return null;
         }

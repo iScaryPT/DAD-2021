@@ -15,18 +15,20 @@ namespace ConfigStorageSP
         public ConfigStorage(string file)
         {
             config = JObject.Parse(File.ReadAllText(file));
+            Console.WriteLine(config);
         }
 
         public JToken getServers()
-        {
+        {   
+            
             return config["Servers"];
         }
 
-        public string findServerById(int id)
+        public string findServerById(string id)
         {
             foreach(var server in config["Servers"])
             {
-                if (server["Id"].ToObject<int>() == 1)
+                if (server["Id"].ToString().Equals("s1"))
                     return server["Url"].ToString();
             }
 
@@ -57,12 +59,24 @@ namespace ConfigStorageSP
             return res.ElementAt((new Random()).Next(0, res.Count-1));
         }
 
-        public void takeServer(int serverId)
+        public void takeServer(string serverId)
         {
             foreach (var server in config["Servers"])
             {
-                if (server["Id"].ToObject<int>() == serverId)
+                if (server["Id"].ToString().Equals(serverId)) { 
                     server["Taken"] = 1;
+                    Console.Write("server id  " );
+                    Console.WriteLine(server["Id"].ToString());
+                }
+                else
+                {
+                    Console.Write(server["Id"].ToString());
+                    Console.Write("not equal to ");
+                    Console.WriteLine(serverId);
+                    //o problema nao está aqui mas pro alguma razao ele acha que o taken é 1 em vez de 0
+                    //RESOLVED
+                }
+
             }
 
             File.WriteAllText("teste.json", config.ToString());

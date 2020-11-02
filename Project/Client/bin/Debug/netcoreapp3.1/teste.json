@@ -3,7 +3,7 @@
 		
 		{	
 			"Taken": 0,
-			"Id": 0,
+			"Id": s1,
 			"Url": "http://localhost:1000",
 			"Partitions": [1],
 			"Master": [1]

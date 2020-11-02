@@ -1,0 +1,2 @@
+obj\Release\netcoreapp3.1\protos/ServerService.cs \
+obj\Release\netcoreapp3.1\protos/ServerServiceGrpc.cs: protos/ServerService.proto
