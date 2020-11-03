@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Client\\Client.csproj": {}
+    "C:\\Users\\heteronimo\\Documents\\GitHub\\DAD-2021\\Project\\Client\\Client.csproj": {}
   },
   "projects": {
-    "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Client\\Client.csproj": {
+    "C:\\Users\\heteronimo\\Documents\\GitHub\\DAD-2021\\Project\\Client\\Client.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Client\\Client.csproj",
+        "projectUniqueName": "C:\\Users\\heteronimo\\Documents\\GitHub\\DAD-2021\\Project\\Client\\Client.csproj",
         "projectName": "Client",
-        "projectPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Client\\Client.csproj",
-        "packagesPath": "C:\\Users\\pedro\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Client\\obj\\",
+        "projectPath": "C:\\Users\\heteronimo\\Documents\\GitHub\\DAD-2021\\Project\\Client\\Client.csproj",
+        "packagesPath": "C:\\Users\\heteronimo\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\heteronimo\\Documents\\GitHub\\DAD-2021\\Project\\Client\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\pedro\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\heteronimo\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
