@@ -1,0 +1,13 @@
+C:\Users\heteronimo\Documents\GitHub\DAD-2021\Project\ReadTxt\bin\Debug\netcoreapp3.1\ReadTxt.exe
+C:\Users\heteronimo\Documents\GitHub\DAD-2021\Project\ReadTxt\bin\Debug\netcoreapp3.1\ReadTxt.deps.json
+C:\Users\heteronimo\Documents\GitHub\DAD-2021\Project\ReadTxt\bin\Debug\netcoreapp3.1\ReadTxt.runtimeconfig.json
+C:\Users\heteronimo\Documents\GitHub\DAD-2021\Project\ReadTxt\bin\Debug\netcoreapp3.1\ReadTxt.runtimeconfig.dev.json
+C:\Users\heteronimo\Documents\GitHub\DAD-2021\Project\ReadTxt\bin\Debug\netcoreapp3.1\ReadTxt.dll
+C:\Users\heteronimo\Documents\GitHub\DAD-2021\Project\ReadTxt\bin\Debug\netcoreapp3.1\ReadTxt.pdb
+C:\Users\heteronimo\Documents\GitHub\DAD-2021\Project\ReadTxt\obj\Debug\netcoreapp3.1\ReadTxt.csprojAssemblyReference.cache
+C:\Users\heteronimo\Documents\GitHub\DAD-2021\Project\ReadTxt\obj\Debug\netcoreapp3.1\ReadTxt.AssemblyInfoInputs.cache
+C:\Users\heteronimo\Documents\GitHub\DAD-2021\Project\ReadTxt\obj\Debug\netcoreapp3.1\ReadTxt.AssemblyInfo.cs
+C:\Users\heteronimo\Documents\GitHub\DAD-2021\Project\ReadTxt\obj\Debug\netcoreapp3.1\ReadTxt.csproj.CoreCompileInputs.cache
+C:\Users\heteronimo\Documents\GitHub\DAD-2021\Project\ReadTxt\obj\Debug\netcoreapp3.1\ReadTxt.dll
+C:\Users\heteronimo\Documents\GitHub\DAD-2021\Project\ReadTxt\obj\Debug\netcoreapp3.1\ReadTxt.pdb
+C:\Users\heteronimo\Documents\GitHub\DAD-2021\Project\ReadTxt\obj\Debug\netcoreapp3.1\ReadTxt.genruntimeconfig.cache
