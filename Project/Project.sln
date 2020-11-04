@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30503.244
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "ConsoleApp1\Server.csproj", "{CE9566CD-3EC0-4213-BDCB-C0E065DD35B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server", "ConsoleApp1\Server.csproj", "{CE9566CD-3EC0-4213-BDCB-C0E065DD35B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{89F9FF1E-122F-4B16-BE38-C8B89556981F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "Client\Client.csproj", "{89F9FF1E-122F-4B16-BE38-C8B89556981F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReadTxt", "..\..\..\..\source\repos\ReadTxt\ReadTxt\ReadTxt.csproj", "{BDF68266-3E75-49B7-91A1-9315F42DAA63}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{89F9FF1E-122F-4B16-BE38-C8B89556981F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89F9FF1E-122F-4B16-BE38-C8B89556981F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89F9FF1E-122F-4B16-BE38-C8B89556981F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDF68266-3E75-49B7-91A1-9315F42DAA63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDF68266-3E75-49B7-91A1-9315F42DAA63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDF68266-3E75-49B7-91A1-9315F42DAA63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDF68266-3E75-49B7-91A1-9315F42DAA63}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
