@@ -26,44 +26,44 @@ namespace ConfigStorageSP
 
         public string findServerById(string id)
         {
-            foreach(var server in config["Servers"])
+            foreach (var server in config["Servers"])
             {
-                if (server["Id"].ToString().Equals("s1"))
+                if (server["Id"].ToObject<string>().Equals(id))
                     return server["Url"].ToString();
             }
 
             return "";
         }
 
-        public string findMServerByPartition(int partition)
+        public string findMServerByPartition(string partition)
         {
             foreach (var server in config["Servers"])
             {
-                if (server["Master"].ToObject<int []>().Contains<int>(partition))
+                if (server["Master"].ToObject<string[]>().Contains(partition))
                     return server["Url"].ToString();
             }
 
             return "";
         }
 
-        public string findRandomServerByPartition(int partition)
+        public string findRandomServerByPartition(string partition)
         {
             List<string> res = new List<string>();
 
             foreach (var server in config["Servers"])
             {
-                if (server["Partitions"].ToObject<int[]>().Contains<int>(partition))
+                if (server["Partitions"].ToObject<string[]>().Contains(partition))
                     res.Add(server["Url"].ToString());
             }
 
-            return res.ElementAt((new Random()).Next(0, res.Count-1));
+            return res.ElementAt((new Random()).Next(0, res.Count - 1));
         }
 
         public void takeServer(string serverId)
         {
             foreach (var server in config["Servers"])
             {
-                if (server["Id"].ToString().Equals(serverId)) { 
+                if (server["Id"].ToObject<string>().Equals(serverId)) { 
                     server["Taken"] = 1;
                     Console.Write("server id  " );
                     Console.WriteLine(server["Id"].ToString());

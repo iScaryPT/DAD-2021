@@ -13,7 +13,7 @@ namespace ServerSP
     class ServerServices : ServerService.ServerServiceBase
     {
 
-        Dictionary<(string, int), string> dataStorage = new Dictionary<(string, int), string>();
+        Dictionary<(string, string), string> dataStorage = new Dictionary<(string, string), string>();
 
         public ServerServices() { }
 
@@ -26,7 +26,7 @@ namespace ServerSP
                 try
                 {
                     res = dataStorage[(request.PartitionId, request.ObjectId)];
-                } catch(KeyNotFoundException e)
+                } catch(KeyNotFoundException)
                 {
                     res = "N/A";
                 }

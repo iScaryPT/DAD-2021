@@ -17,14 +17,14 @@ namespace ClientLogicSP
         public ClientLogic(string host, ConfigStorage config) {
 
             this.config = config;
-            this.serverUrl = host;
+            serverUrl = host;
             AppContext.SetSwitch(
                     "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            this.channel = GrpcChannel.ForAddress(host);
+            channel = GrpcChannel.ForAddress(host);
             client = new ServerService.ServerServiceClient(channel);
         }
 
-        public string Read(int partitionId, int objectId, int serverId) {
+        public string Read(string partitionId, string objectId, string serverId) {
 
             ReadReply reply = client.Read(new ReadRequest
             {
@@ -34,19 +34,19 @@ namespace ClientLogicSP
 
             if (reply.ObjectValue.ToString().Equals("N/A"))
             {
-                if(serverId == -1)
+                if(serverId.Equals("-1"))
                 {   
                     string newServerUrl = config.findRandomServerByPartition(partitionId);
-                    while(newServerUrl.Equals(this.serverUrl))
+                    while(newServerUrl.Equals(serverUrl))
                         newServerUrl = config.findRandomServerByPartition(partitionId);
-                    this.changeServer(newServerUrl);
+                    changeServer(newServerUrl);
 
                 } else
                 {
                     string newServerUrl = config.findServerById(serverId);
-                    if (!newServerUrl.Equals(this.serverUrl))
+                    if (!newServerUrl.Equals(serverUrl))
                     {
-                        this.changeServer(newServerUrl);
+                        changeServer(newServerUrl);
                     }
 
                 }
@@ -61,12 +61,12 @@ namespace ClientLogicSP
             //ignore my broken pipe it still works
             return reply.ObjectValue.ToString();
         }
-        public bool Write(int partitionId, int objectId, string value) {
+        public bool Write(string partitionId, string objectId, string value) {
 
             string masterServer = config.findMServerByPartition(partitionId);
-            if (!this.serverUrl.Equals(masterServer))
+            if (!serverUrl.Equals(masterServer))
             {
-                this.changeServer(masterServer);
+                changeServer(masterServer);
             }
 
             WriteReply reply = client.Write(new WriteRequest { 
@@ -84,15 +84,15 @@ namespace ClientLogicSP
 
         public void shutDown()
         {
-            this.channel.ShutdownAsync();
+            channel.ShutdownAsync();
         }
 
         public void changeServer(string host)
         {
-            this.shutDown();
-            this.serverUrl = host;
-            this.channel = GrpcChannel.ForAddress(this.serverUrl);
-            this.client = new ServerService.ServerServiceClient(this.channel);
+            shutDown();
+            serverUrl = host;
+            channel = GrpcChannel.ForAddress(serverUrl);
+            client = new ServerService.ServerServiceClient(channel);
         }
 
     }

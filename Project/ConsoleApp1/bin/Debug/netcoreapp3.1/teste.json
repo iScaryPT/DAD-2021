@@ -1,14 +1,27 @@
 {
   "Servers": [
     {
-      "Taken": 1,
+      "Taken": 0,
       "Id": "s1",
       "Url": "http://localhost:1000",
       "Partitions": [
-        1
+        "part1",
+        "p2"
       ],
       "Master": [
-        1
+        "part1"
+      ]
+    },
+    {
+      "Taken": 0,
+      "Id": "s2",
+      "Url": "http://localhost:1001",
+      "Partitions": [
+        "part1",
+        "p2"
+      ],
+      "Master": [
+        "p2"
       ]
     }
   ]

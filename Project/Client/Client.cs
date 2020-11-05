@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.Design;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -17,10 +18,10 @@ namespace ClientSP
 
         public Client(string configFile) {
             config = new ConfigStorage(configFile);
-            client = new ClientLogic(config.findMServerByPartition(1), config);
+            client = new ClientLogic(config.findMServerByPartition("part1"), config);
         }
 
-        public int repeatNum()
+        public int RepeatNum()
         {
             return this.repeat_num;
         }
@@ -32,21 +33,8 @@ namespace ClientSP
                 Console.WriteLine("Definition: read <partition_id> <object_id> <server_id>");
                 return;
             }
-
-            try
-            {
-                //Console.WriteLine("Read OK");
-                int partitionId = int.Parse(commandArgs[1]);
-                int objectId = int.Parse(commandArgs[2]);
-                int serverId = int.Parse(commandArgs[3]);
-                Console.WriteLine(client.Read(partitionId, objectId, serverId));
-            }
-            catch (FormatException e)
-            {
-                Console.WriteLine(e.Message);
-                Console.WriteLine("Command error: invalid number format...");
-                Console.WriteLine("Definition: read <partition_id> <object_id> <server_id>");
-            }
+            
+            Console.WriteLine(client.Read(commandArgs[1], commandArgs[2], commandArgs[3]));
         }
 
         public void Write(string[] commandArgs) {
@@ -57,23 +45,11 @@ namespace ClientSP
                 return;
             }
 
-            try
-            {
-                //Console.WriteLine("Write OK");
-                int partitionId = int.Parse(commandArgs[1]);
-                int objectId = int.Parse(commandArgs[2]);
-                string value = "";
-                for (var i = 3; i < commandArgs.Length; i++)
-                    value += commandArgs[i] + (i == commandArgs.Length - 1 ? "" : " ");
-                value = value.Replace("\"", "");
-                Console.WriteLine(client.Write(partitionId, objectId, value));
-            }
-            catch (FormatException e)
-            {
-                Console.WriteLine(e.Message);
-                Console.WriteLine("Command error: invalid number format...");
-                Console.WriteLine("Definition: write <partition_id> <object_id> <value>");
-            }
+            string value = "";
+            for (var i = 3; i < commandArgs.Length; i++)
+                value += commandArgs[i] + (i == commandArgs.Length - 1 ? "" : " ");
+            value = value.Replace("\"", "");
+            Console.WriteLine(client.Write(commandArgs[1], commandArgs[2], value));
         }
 
         public void ListServer(string[] commandArgs) {
@@ -123,7 +99,8 @@ namespace ClientSP
                 int millSec = int.Parse(commandArgs[1]);
                 Thread.Sleep(millSec);
             } catch(FormatException e)
-            {   
+            {
+                Console.WriteLine(e.Message);
                 Console.WriteLine("Command error: invalid number format of milliseconds...");
             }
             
@@ -144,6 +121,7 @@ namespace ClientSP
 
             } catch(FormatException e)
             {
+                Console.WriteLine(e.Message);
                 Console.WriteLine("Command error: invalid number format of milliseconds...");
             }
         }
@@ -210,7 +188,7 @@ namespace ClientSP
             {
                 string command = Console.ReadLine();
 
-                for(var i = 0; i < client.repeatNum(); i++)
+                for(var i = 0; i < client.RepeatNum(); i++)
                 {
                     string newCmd = command.Replace("$i", (i + 1).ToString());
                     client.parseCommand(newCmd);

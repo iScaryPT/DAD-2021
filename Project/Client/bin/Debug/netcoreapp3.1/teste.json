@@ -3,10 +3,17 @@
 		
 		{	
 			"Taken": 0,
-			"Id": s1,
+			"Id": "s1",
 			"Url": "http://localhost:1000",
-			"Partitions": [1],
-			"Master": [1]
+			"Partitions": ["part1", "p2"],
+			"Master": ["part1"]
+		},
+		{	
+			"Taken": 0,
+			"Id": "s2",
+			"Url": "http://localhost:1001",
+			"Partitions": ["part1", "p2"],
+			"Master": ["p2"]
 		}
 			
 	]
