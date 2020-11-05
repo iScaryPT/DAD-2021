@@ -23,9 +23,9 @@ public static partial class ServerServiceReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "Chpwcm90b3MvU2VydmVyU2VydmljZS5wcm90byI0CgtSZWFkUmVxdWVzdBIT",
-          "CgtwYXJ0aXRpb25JZBgBIAEoCRIQCghvYmplY3RJZBgCIAEoBSIgCglSZWFk",
+          "CgtwYXJ0aXRpb25JZBgBIAEoCRIQCghvYmplY3RJZBgCIAEoCSIgCglSZWFk",
           "UmVwbHkSEwoLb2JqZWN0VmFsdWUYASABKAkiSgoMV3JpdGVSZXF1ZXN0EhMK",
-          "C3BhcnRpdGlvbklkGAEgASgJEhAKCG9iamVjdElkGAIgASgFEhMKC29iamVj",
+          "C3BhcnRpdGlvbklkGAEgASgJEhAKCG9iamVjdElkGAIgASgJEhMKC29iamVj",
           "dFZhbHVlGAMgASgJIhgKCldyaXRlUmVwbHkSCgoCb2sYASABKAgyVgoNU2Vy",
           "dmVyU2VydmljZRIgCgRSZWFkEgwuUmVhZFJlcXVlc3QaCi5SZWFkUmVwbHkS",
           "IwoFV3JpdGUSDS5Xcml0ZVJlcXVlc3QaCy5Xcml0ZVJlcGx5YgZwcm90bzM="));
@@ -94,12 +94,12 @@ public sealed partial class ReadRequest : pb::IMessage<ReadRequest>
 
   /// <summary>Field number for the "objectId" field.</summary>
   public const int ObjectIdFieldNumber = 2;
-  private int objectId_;
+  private string objectId_ = "";
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public int ObjectId {
+  public string ObjectId {
     get { return objectId_; }
     set {
-      objectId_ = value;
+      objectId_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
     }
   }
 
@@ -125,7 +125,7 @@ public sealed partial class ReadRequest : pb::IMessage<ReadRequest>
   public override int GetHashCode() {
     int hash = 1;
     if (PartitionId.Length != 0) hash ^= PartitionId.GetHashCode();
-    if (ObjectId != 0) hash ^= ObjectId.GetHashCode();
+    if (ObjectId.Length != 0) hash ^= ObjectId.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -146,9 +146,9 @@ public sealed partial class ReadRequest : pb::IMessage<ReadRequest>
       output.WriteRawTag(10);
       output.WriteString(PartitionId);
     }
-    if (ObjectId != 0) {
-      output.WriteRawTag(16);
-      output.WriteInt32(ObjectId);
+    if (ObjectId.Length != 0) {
+      output.WriteRawTag(18);
+      output.WriteString(ObjectId);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
@@ -163,9 +163,9 @@ public sealed partial class ReadRequest : pb::IMessage<ReadRequest>
       output.WriteRawTag(10);
       output.WriteString(PartitionId);
     }
-    if (ObjectId != 0) {
-      output.WriteRawTag(16);
-      output.WriteInt32(ObjectId);
+    if (ObjectId.Length != 0) {
+      output.WriteRawTag(18);
+      output.WriteString(ObjectId);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
@@ -179,8 +179,8 @@ public sealed partial class ReadRequest : pb::IMessage<ReadRequest>
     if (PartitionId.Length != 0) {
       size += 1 + pb::CodedOutputStream.ComputeStringSize(PartitionId);
     }
-    if (ObjectId != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(ObjectId);
+    if (ObjectId.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(ObjectId);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -196,7 +196,7 @@ public sealed partial class ReadRequest : pb::IMessage<ReadRequest>
     if (other.PartitionId.Length != 0) {
       PartitionId = other.PartitionId;
     }
-    if (other.ObjectId != 0) {
+    if (other.ObjectId.Length != 0) {
       ObjectId = other.ObjectId;
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
@@ -217,8 +217,8 @@ public sealed partial class ReadRequest : pb::IMessage<ReadRequest>
           PartitionId = input.ReadString();
           break;
         }
-        case 16: {
-          ObjectId = input.ReadInt32();
+        case 18: {
+          ObjectId = input.ReadString();
           break;
         }
       }
@@ -239,8 +239,8 @@ public sealed partial class ReadRequest : pb::IMessage<ReadRequest>
           PartitionId = input.ReadString();
           break;
         }
-        case 16: {
-          ObjectId = input.ReadInt32();
+        case 18: {
+          ObjectId = input.ReadString();
           break;
         }
       }
@@ -475,12 +475,12 @@ public sealed partial class WriteRequest : pb::IMessage<WriteRequest>
 
   /// <summary>Field number for the "objectId" field.</summary>
   public const int ObjectIdFieldNumber = 2;
-  private int objectId_;
+  private string objectId_ = "";
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public int ObjectId {
+  public string ObjectId {
     get { return objectId_; }
     set {
-      objectId_ = value;
+      objectId_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
     }
   }
 
@@ -518,7 +518,7 @@ public sealed partial class WriteRequest : pb::IMessage<WriteRequest>
   public override int GetHashCode() {
     int hash = 1;
     if (PartitionId.Length != 0) hash ^= PartitionId.GetHashCode();
-    if (ObjectId != 0) hash ^= ObjectId.GetHashCode();
+    if (ObjectId.Length != 0) hash ^= ObjectId.GetHashCode();
     if (ObjectValue.Length != 0) hash ^= ObjectValue.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
@@ -540,9 +540,9 @@ public sealed partial class WriteRequest : pb::IMessage<WriteRequest>
       output.WriteRawTag(10);
       output.WriteString(PartitionId);
     }
-    if (ObjectId != 0) {
-      output.WriteRawTag(16);
-      output.WriteInt32(ObjectId);
+    if (ObjectId.Length != 0) {
+      output.WriteRawTag(18);
+      output.WriteString(ObjectId);
     }
     if (ObjectValue.Length != 0) {
       output.WriteRawTag(26);
@@ -561,9 +561,9 @@ public sealed partial class WriteRequest : pb::IMessage<WriteRequest>
       output.WriteRawTag(10);
       output.WriteString(PartitionId);
     }
-    if (ObjectId != 0) {
-      output.WriteRawTag(16);
-      output.WriteInt32(ObjectId);
+    if (ObjectId.Length != 0) {
+      output.WriteRawTag(18);
+      output.WriteString(ObjectId);
     }
     if (ObjectValue.Length != 0) {
       output.WriteRawTag(26);
@@ -581,8 +581,8 @@ public sealed partial class WriteRequest : pb::IMessage<WriteRequest>
     if (PartitionId.Length != 0) {
       size += 1 + pb::CodedOutputStream.ComputeStringSize(PartitionId);
     }
-    if (ObjectId != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(ObjectId);
+    if (ObjectId.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(ObjectId);
     }
     if (ObjectValue.Length != 0) {
       size += 1 + pb::CodedOutputStream.ComputeStringSize(ObjectValue);
@@ -601,7 +601,7 @@ public sealed partial class WriteRequest : pb::IMessage<WriteRequest>
     if (other.PartitionId.Length != 0) {
       PartitionId = other.PartitionId;
     }
-    if (other.ObjectId != 0) {
+    if (other.ObjectId.Length != 0) {
       ObjectId = other.ObjectId;
     }
     if (other.ObjectValue.Length != 0) {
@@ -625,8 +625,8 @@ public sealed partial class WriteRequest : pb::IMessage<WriteRequest>
           PartitionId = input.ReadString();
           break;
         }
-        case 16: {
-          ObjectId = input.ReadInt32();
+        case 18: {
+          ObjectId = input.ReadString();
           break;
         }
         case 26: {
@@ -651,8 +651,8 @@ public sealed partial class WriteRequest : pb::IMessage<WriteRequest>
           PartitionId = input.ReadString();
           break;
         }
-        case 16: {
-          ObjectId = input.ReadInt32();
+        case 18: {
+          ObjectId = input.ReadString();
           break;
         }
         case 26: {

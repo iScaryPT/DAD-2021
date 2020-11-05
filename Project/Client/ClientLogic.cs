@@ -9,14 +9,12 @@ namespace ClientLogicSP
 
     class ClientLogic
     {
-        private readonly ConfigStorage config;
         private GrpcChannel channel;
         private ServerService.ServerServiceClient client;
         private string serverUrl;
 
-        public ClientLogic(string host, ConfigStorage config) {
+        public ClientLogic(string host) {
 
-            this.config = config;
             serverUrl = host;
             AppContext.SetSwitch(
                     "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
@@ -32,42 +30,17 @@ namespace ClientLogicSP
                 PartitionId = partitionId
             });
 
-            if (reply.ObjectValue.ToString().Equals("N/A"))
-            {
-                if(serverId.Equals("-1"))
-                {   
-                    string newServerUrl = config.findRandomServerByPartition(partitionId);
-                    while(newServerUrl.Equals(serverUrl))
-                        newServerUrl = config.findRandomServerByPartition(partitionId);
-                    changeServer(newServerUrl);
-
-                } else
-                {
-                    string newServerUrl = config.findServerById(serverId);
-                    if (!newServerUrl.Equals(serverUrl))
-                    {
-                        changeServer(newServerUrl);
-                    }
-
-                }
-
-                reply = client.Read(new ReadRequest
-                {
-                    ObjectId = objectId,
-                    PartitionId = partitionId
-                });
-            }
 
             //ignore my broken pipe it still works
             return reply.ObjectValue.ToString();
         }
         public bool Write(string partitionId, string objectId, string value) {
 
-            string masterServer = config.findMServerByPartition(partitionId);
-            if (!serverUrl.Equals(masterServer))
+            //string masterServer = config.findMServerByPartition(partitionId);
+           /* if (!serverUrl.Equals(masterServer))
             {
                 changeServer(masterServer);
-            }
+            }*/
 
             WriteReply reply = client.Write(new WriteRequest { 
                 

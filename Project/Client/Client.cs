@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Design;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -12,13 +13,19 @@ namespace ClientSP
     {
 
         private ClientLogic client;
-        private readonly ConfigStorage config;
+
         private bool is_repeating = false;
         private int repeat_num = 1;
 
-        public Client(string configFile) {
-            config = new ConfigStorage(configFile);
-            client = new ClientLogic(config.findMServerByPartition("part1"), config);
+        string name;
+        string url;
+
+        public Client(string name, string url, string serverurl) {
+
+            this.name = name;
+            this.url = url;
+
+            client = new ClientLogic(serverurl);
         }
 
         public int RepeatNum()
@@ -181,9 +188,28 @@ namespace ClientSP
 
         static void Main(string[] args)
         {
+            string username = args[0];
+            string clienturl = args[1];
+            string scriptfile = args[2];
+            string serverurl = args[3];
 
-            Client client = new Client("teste.json");
+            Client client = new Client(username, clienturl, serverurl);
 
+            //To Read from Script
+            StreamReader reader = File.OpenText(scriptfile);
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                for (var i = 0; i < client.RepeatNum(); i++)
+                {
+                    string newCmd = line.Replace("$i", (i + 1).ToString());
+                    client.parseCommand(newCmd);
+                    Console.WriteLine("exec: " + newCmd);
+                }
+
+            }
+
+            //To Read from Terminal
             while (true)
             {
                 string command = Console.ReadLine();
@@ -196,6 +222,8 @@ namespace ClientSP
                 }
                    
             }
+
+
         }
 
     }

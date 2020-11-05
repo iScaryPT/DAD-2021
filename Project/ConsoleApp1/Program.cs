@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Schema;
 using ConfigStorageSP;
@@ -15,12 +16,23 @@ namespace ServerSP
 
         Dictionary<(string, string), string> dataStorage = new Dictionary<(string, string), string>();
 
-        public ServerServices() { }
+        string id;
+        int mindelay;
+        int maxdelay;
+
+
+        public ServerServices(string id, int mindelay, int maxdelay) {
+            this.id = id;
+            this.mindelay = mindelay;
+            this.maxdelay = maxdelay;
+        }
+
+
 
         public override Task<ReadReply> Read(ReadRequest request, ServerCallContext context)
         {
+            Thread.Sleep((new Random()).Next(mindelay, maxdelay));
             string res;
-
             lock (this)
             {
                 try
@@ -32,7 +44,7 @@ namespace ServerSP
                 }
             }
 
-            Console.WriteLine("Vou mandar isto: " + res);
+            
             return Task.FromResult(new ReadReply
             {
                 ObjectValue = res
@@ -41,11 +53,13 @@ namespace ServerSP
 
         public override Task<WriteReply> Write(WriteRequest request, ServerCallContext context)
         {
+
+            Thread.Sleep((new Random()).Next(mindelay, maxdelay));
             lock (this)
             {
                 dataStorage[(request.PartitionId, request.ObjectId)] = request.ObjectValue;
             }
-
+                        
             return Task.FromResult(new WriteReply { Ok = true });
         }
 
@@ -56,14 +70,15 @@ namespace ServerSP
 
         public static void Main(string[] args)
         {
-            ConfigStorage config = new ConfigStorage("teste.json");
-            JToken serverConfig = Program.getServerConfigs(config);
 
-            Uri uri = new Uri(serverConfig["Url"].ToObject<string>());
+            string id = args[0];
+            Uri uri = new Uri(args[1]);
+            int mindelay = Int32.Parse(args[2]);
+            int maxdelay = Int32.Parse(args[3]);
 
             Server server = new Server
             {
-                Services = { ServerService.BindService(new ServerServices()) },
+                Services = { ServerService.BindService(new ServerServices( id, mindelay , maxdelay)) },
                 Ports = { new ServerPort(uri.Host, uri.Port, ServerCredentials.Insecure) }
             };
 
@@ -71,25 +86,7 @@ namespace ServerSP
             Console.ReadKey();
             server.ShutdownAsync().Wait();
 
-
         }
         
-        public static JToken getServerConfigs(ConfigStorage config)
-        {
-            foreach(var server in config.getServers())
-            {
-                if(server["Taken"].ToObject<int>() == 0)
-                {
-                    Console.WriteLine("taken == 0");
-                    config.takeServer(server["Id"].ToString());
-                    return server;
-                    
-                }
-                Console.WriteLine(server["Taken"].ToObject<int>());
-                Console.WriteLine("taken != 0");
-                Console.ReadLine();
-            }
-            return null;
-        }
     }
 }
