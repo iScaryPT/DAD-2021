@@ -76,10 +76,12 @@ namespace ReadTxt
         public string Servers { get; set; }
     }
 
-    class Server
+    class ServerInfo
     {
         public string Name { get; set; }
-        public string Location { get; set; }
+        public string Url { get; set; }
+        public List<string> Master { get; set; }
+        public List<string> Partitions { get; set; }
         public int Mindelay { get; set; }
         public int Maxdelay { get; set; }
     }

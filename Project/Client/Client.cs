@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -9,6 +10,7 @@ using ConfigStorageSP;
 
 namespace ClientSP
 {
+
     class Client
     {
 
@@ -70,7 +72,8 @@ namespace ClientSP
             try
             {
                 //Console.WriteLine("List Server OK");
-                int serverId = int.Parse(commandArgs[1]);
+                string serverId = commandArgs[1];
+                Console.WriteLine(serverId);
                 //Call some function
             }
             catch (FormatException e)

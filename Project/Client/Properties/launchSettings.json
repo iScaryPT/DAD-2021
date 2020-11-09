@@ -2,7 +2,7 @@
   "profiles": {
     "Client": {
       "commandName": "Project",
-      "commandLineArgs": "\"mary\" \"http://localhost:4000\" \"teste.txt\" \"http://localhost:3000\""
+      "commandLineArgs": "\"mary\" \"http://localhost:4000\" \"client_script2\" \"http://localhost:3000\""
     }
   }
 }
