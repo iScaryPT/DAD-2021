@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using System.Text;
 using ClientSP;
-using ConfigStorageSP;
 using Grpc.Net.Client;
 
 namespace ClientLogicSP
@@ -16,7 +16,7 @@ namespace ClientLogicSP
 
         List<ServerInfo> serversi = new List<ServerInfo>();
         public ClientLogic(string[]args) {
-            for (int i = 0; i < args.Length; i++)
+            for (int i = 3; i < args.Length; i++)
             {
                 serversi.Add(new ServerInfo(args[i]));
             }
@@ -25,12 +25,14 @@ namespace ClientLogicSP
 
         public void Connect(string host)
         {
+            if (this.channel != null)
+                this.shutDown();
             serverUrl = host;
             AppContext.SetSwitch(
                     "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             channel = GrpcChannel.ForAddress(host);
             client = new ServerService.ServerServiceClient(channel);
-
+            Console.WriteLine($"Client connected to {host}");
         }
 
         public string Read(string partitionId, string objectId, string serverId) {
@@ -53,9 +55,10 @@ namespace ClientLogicSP
             if (reply.ObjectValue.Equals("N/A") && !serverId.Equals("-1"))
             {
                 string url = findServerbyId(serverId);
+                
                 if (!serverUrl.Equals(url))
                 {
-                    this.Connect(serverUrl);
+                    this.Connect(url);
 
                 }
                 reply = client.Read(new ReadRequest
@@ -70,10 +73,10 @@ namespace ClientLogicSP
         }
         public bool Write(string partitionId, string objectId, string value) {
 
-            if (this.client == null || serverUrl != findMasterbyPartition(partitionId))
-            {
-                this.serverUrl = findMasterbyPartition(partitionId);
-                this.Connect(serverUrl);
+            string tmpUrl = findMasterbyPartition(partitionId);
+            if (this.client == null || !serverUrl.Equals(tmpUrl))
+            {  
+                this.Connect(tmpUrl);
             }
 
 
@@ -87,25 +90,42 @@ namespace ClientLogicSP
 
             return reply.Ok;
         }
-        public void listGlobal() { }
-        public void listServer() { }
+        public string listGlobal() {
+
+            string res = "";
+            foreach(ServerInfo s in serversi)
+            {
+                res += "[Server " + s.Name + "]\r\n";
+                res += this.listServer(s.Name) + "\r\n";
+            }
+
+            return res;
+        }
+        public string listServer(string serverId) 
+        {
+            string tmpUrl = findServerbyId(serverId);
+            if (this.client == null || !serverUrl.Equals(tmpUrl))
+            {
+                this.Connect(tmpUrl);
+            }
+
+            ListServerReply reply = client.ListServer(new ListServerRequest { });
+
+            return reply.Objects;
+
+        }
         public void shutDown()
         {
-            channel.ShutdownAsync();
+            channel.ShutdownAsync().Wait();
         }
 
-        public void changeServer(string host)
-        {
-            shutDown();
-            serverUrl = host;
-            channel = GrpcChannel.ForAddress(serverUrl);
-            client = new ServerService.ServerServiceClient(channel);
-        }
+
 
         public string findMasterbyPartition(string partitionId)
         {
             foreach(ServerInfo sinfo in serversi)
             {
+                
                 if(sinfo.Master.Contains(partitionId))
                 {
                     return sinfo.Url;
@@ -149,8 +169,8 @@ namespace ClientLogicSP
             string[] ser = info.Split("|");
             this.name = ser[0];
             this.url = ser[1];
-            this.master = new List<string>(ser[2].Split(" "));
-            this.partitions = new List<string>(ser[3].Split(" "));
+            this.master = new List<string>(ser[2].Split(","));
+            this.partitions = new List<string>(ser[3].Split(","));
             this.mindelay = Int32.Parse(ser[4]);
             this.maxdelay = Int32.Parse(ser[5]);
         }

@@ -6,7 +6,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using ClientLogicSP;
-using ConfigStorageSP;
 
 namespace ClientSP
 {
@@ -18,16 +17,17 @@ namespace ClientSP
 
         private bool is_repeating = false;
         private int repeat_num = 1;
+        private List<string> list_cmds;
 
         string name;
         string url;
 
-        public Client(string name, string url, string serverurl) {
+        public Client(string name, string url, string[] serverurls) {
 
             this.name = name;
             this.url = url;
 
-            client = new ClientLogic(serverurl);
+            client = new ClientLogic(serverurls);
         }
 
         public int RepeatNum()
@@ -43,7 +43,7 @@ namespace ClientSP
                 return;
             }
             
-            Console.WriteLine(client.Read(commandArgs[1], commandArgs[2], commandArgs[3]));
+            Console.WriteLine($"Read response: {client.Read(commandArgs[1], commandArgs[2], commandArgs[3])}");
         }
 
         public void Write(string[] commandArgs) {
@@ -58,7 +58,7 @@ namespace ClientSP
             for (var i = 3; i < commandArgs.Length; i++)
                 value += commandArgs[i] + (i == commandArgs.Length - 1 ? "" : " ");
             value = value.Replace("\"", "");
-            Console.WriteLine(client.Write(commandArgs[1], commandArgs[2], value));
+            Console.WriteLine($"Write Status: {client.Write(commandArgs[1], commandArgs[2], value)}");
         }
 
         public void ListServer(string[] commandArgs) {
@@ -73,7 +73,7 @@ namespace ClientSP
             {
                 //Console.WriteLine("List Server OK");
                 string serverId = commandArgs[1];
-                Console.WriteLine(serverId);
+                Console.WriteLine(client.listServer(serverId));
                 //Call some function
             }
             catch (FormatException e)
@@ -92,7 +92,7 @@ namespace ClientSP
                 Console.WriteLine("Definition: listGlobal");
                 return;
             }
-            //Console.WriteLine("List Global OK");
+            Console.WriteLine(client.listGlobal());
         }
 
         //TODO exception handling for thread.sleep()
@@ -107,6 +107,7 @@ namespace ClientSP
             try 
             { 
                 int millSec = int.Parse(commandArgs[1]);
+                Console.WriteLine($"Waiting {millSec / 1000} seconds ...");
                 Thread.Sleep(millSec);
             } catch(FormatException e)
             {
@@ -128,6 +129,7 @@ namespace ClientSP
             {
                 this.is_repeating = true;
                 this.repeat_num = int.Parse(commandArgs[1]);
+                this.list_cmds = new List<string>();
 
             } catch(FormatException e)
             {
@@ -143,9 +145,18 @@ namespace ClientSP
                 Console.WriteLine("Definition: end-repeat");
                 return;
             }
+            Console.WriteLine("End of Begin-Repeat");
             this.is_repeating = false;
-            this.repeat_num = 1;
-            //Console.WriteLine("End Repeat OK");
+
+            for (var i = 0; i < this.repeat_num; i++)
+            {
+                foreach(string cmd in this.list_cmds)
+                {
+                    string parsedCmd = cmd.Replace("$i", (i + 1).ToString());
+                    this.parseCommand(parsedCmd);
+                }
+                
+            }
         }
 
         public void parseCommand(string command)
@@ -158,6 +169,14 @@ namespace ClientSP
                 return;
             }
 
+            if (this.is_repeating && !commandArgs[0].Equals("end-repeat"))
+            {
+                this.list_cmds.Add(command);
+                return;
+            }
+
+
+            //Console.WriteLine("exec: " + command);
             switch (commandArgs[0])
             {
                 case "read":
@@ -194,22 +213,22 @@ namespace ClientSP
             string username = args[0];
             string clienturl = args[1];
             string scriptfile = args[2];
-            string serverurl = args[3];
 
-            Client client = new Client(username, clienturl, serverurl);
+            Client client = new Client(username, clienturl, args);
 
             //To Read from Script
-            StreamReader reader = File.OpenText(scriptfile);
-            string line;
-            while ((line = reader.ReadLine()) != null)
+            try
             {
-                for (var i = 0; i < client.RepeatNum(); i++)
+                StreamReader reader = File.OpenText(scriptfile);
+                string line;
+                while ((line = reader.ReadLine()) != null)
                 {
-                    string newCmd = line.Replace("$i", (i + 1).ToString());
-                    client.parseCommand(newCmd);
-                    Console.WriteLine("exec: " + newCmd);
+                    client.parseCommand(line);
                 }
 
+            } catch(FileNotFoundException)
+            {
+                Console.WriteLine("File not found or not provided.");
             }
 
             //To Read from Terminal
@@ -217,12 +236,7 @@ namespace ClientSP
             {
                 string command = Console.ReadLine();
 
-                for(var i = 0; i < client.RepeatNum(); i++)
-                {
-                    string newCmd = command.Replace("$i", (i + 1).ToString());
-                    client.parseCommand(newCmd);
-                    Console.WriteLine("exec: " + newCmd);
-                }
+                client.parseCommand(command);
                    
             }
 

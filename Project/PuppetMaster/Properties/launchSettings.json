@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ReadTxt": {
+      "commandName": "Project",
+      "commandLineArgs": "\"scripts/parse.txt\""
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Server": {
+      "commandName": "Project",
+      "commandLineArgs": "\"s1|http://localhost:3000|p1|p1,p2|0|100\""
+    }
+  }
+}
