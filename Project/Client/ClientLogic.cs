@@ -65,7 +65,9 @@ namespace ClientLogicSP
                 Console.WriteLine($"Server {this.serverUrl} not available.");
                 this.channel = null;
                 this.client = null;
+                removeServerUrlfromList(serverUrl);
                 this.serverUrl = "";
+               
             }
             
 
@@ -91,7 +93,9 @@ namespace ClientLogicSP
                     Console.WriteLine($"Server {this.serverUrl} not available.");
                     this.channel =  null;
                     this.client = null;
+                    removeServerUrlfromList(serverUrl);
                     this.serverUrl = "";
+                    
                 }
             }
 
@@ -106,14 +110,26 @@ namespace ClientLogicSP
                 this.Connect(tmpUrl);
             }
 
+            try(){
+                WriteReply reply = client.Write(new WriteRequest
+                {
 
-            WriteReply reply = client.Write(new WriteRequest { 
-                
-                PartitionId = partitionId,
-                ObjectId = objectId,
-                ObjectValue = value
+                    PartitionId = partitionId,
+                    ObjectId = objectId,
+                    ObjectValue = value
 
-            });
+                });
+            }catch (Exception)
+            {
+                Console.WriteLine($"Server {this.serverUrl} not available.");
+                this.channel = null;
+                this.client = null;
+                this.serverUrl = "";
+
+                removeServerIdfromList(tmpUrl);
+            }
+
+            
 
             return reply.Ok;
         }
@@ -178,6 +194,26 @@ namespace ClientLogicSP
             return "";
         }
 
+    
+        public void removeServerUrlfromList(string url)
+        {
+            string serverid = "";
+            foreach (ServerInfo si in serversi){
+                if (si.Url.Equals(url){
+                    serverid = si.Name;
+                    serversi.Remove(si);
+                }
+            }
+            foreach (ServerInfo si in serversi)
+            {
+                if (si.Partitions.Contains(serverid))
+                {
+                    si.Partitions.Remove(serverid)
+                }
+            }
+        }
+    
+    
     }
 
     class ServerInfo
