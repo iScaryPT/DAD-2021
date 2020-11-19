@@ -5,6 +5,10 @@ service ServerService {
   rpc Write (WriteRequest) returns (WriteReply);
   rpc ListServer (ListServerRequest) returns (ListServerReply);
   rpc BroadcastMsg (BroadcastMessageRequest) returns (BroadcastMessageReply);
+  rpc Freeze (FreezeRequest) returns (FreezeReply);
+  rpc UnFreeze (UnFreezeRequest) returns (UnFreezeReply);
+  rpc Crash (CrashRequest) returns (CrashReply);
+  rpc Status (StatusRequest) returns (StatusReply);
 }
 
 message ReadRequest {
@@ -40,3 +44,19 @@ message BroadcastMessageRequest {
 }
 
 message BroadcastMessageReply {} 
+
+message FreezeRequest {}
+
+message FreezeReply {}
+
+
+message UnFreezeRequest {}
+
+message UnFreezeReply {}
+
+message CrashRequest {}
+message CrashReply {}
+
+
+message StatusRequest {}
+message StatusReply {}

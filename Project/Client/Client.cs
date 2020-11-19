@@ -138,6 +138,7 @@ namespace ClientSP
             }
         }
 
+
         public void End_repeat(string[] commandArgs) {
             if (commandArgs.Length != 1)
             {
@@ -199,8 +200,6 @@ namespace ClientSP
                     break;
                 case "end-repeat":
                     this.End_repeat(commandArgs);
-                    break;
-                case null:
                     break;
                 default:
                     Console.WriteLine("Command not found!");

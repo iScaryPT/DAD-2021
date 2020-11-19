@@ -7,11 +7,38 @@ using System.Threading.Tasks;
 using System.Xml.Schema;
 using Google.Protobuf.Reflection;
 using Grpc.Core;
+using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
 using Newtonsoft.Json.Linq;
 
 namespace ServerSP
 {
+    /*
+    class ServerInterceptor : Interceptor
+    {
+        private bool is_intercepting;
+
+        public ServerInterceptor()
+        {
+            this.is_intercepting = false;
+        }
+
+        public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(TRequest request, ServerCallContext context, UnaryServerMethod<TRequest, TResponse> continuation)
+        {
+            while (!is_intercepting)
+                await Task.Delay(25);
+
+            var response = await base.UnaryServerHandler(request, context, continuation);
+            return response;
+        }
+
+        public void intercept()
+        {
+            this.is_intercepting = !this.is_intercepting;
+        }
+    }
+    */
+
     class ServerInfo
     {
         private string name;
@@ -20,6 +47,7 @@ namespace ServerSP
         private List<string> partitions;
         private int mindelay;
         private int maxdelay;
+
         public string Name { get { return name; } }
         public string Url { get { return url; } }
         public List<string> Master { get { return master; } }
@@ -53,6 +81,12 @@ namespace ServerSP
         //works for stablish a connection to all servers
         private GrpcChannel channel;
         private ServerService.ServerServiceClient server;
+        //private ServerInterceptor interceptor;
+
+        private bool isFreezing;
+        private object fLock;
+
+        private Server s;
 
         public void BroadCastMessage(string host, string partitionId, string objectId, string value)
         {
@@ -71,7 +105,7 @@ namespace ServerSP
             });
         }
 
-        public ServerServices(string[] args) {
+        public ServerServices(string[] args, Server server) {
 
             myinfo = new ServerInfo(args[0]);
 
@@ -80,6 +114,10 @@ namespace ServerSP
                 serversinfo.Add( new ServerInfo(args[i]));
             }
 
+            //this.interceptor = interceptor;
+            this.isFreezing = false;
+            this.fLock = new object();
+            this.s = server;
         }
 
         public void shutDown()
@@ -88,9 +126,38 @@ namespace ServerSP
         }
 
 
+        public override Task<CrashReply> Crash(CrashRequest request, ServerCallContext context)
+        {
+            this.s.ShutdownAsync().Wait();
+            return Task.FromResult(new CrashReply { });
+        }
+
+        public override Task<StatusReply> Status( StatusRequest request, ServerCallContext context)
+        {
+            Console.WriteLine("-------[Debug]-------");
+
+            string mp = "";
+            foreach (string s in this.myinfo.Master)
+                mp += s + " ";
+
+            string sp = "";
+            foreach (string partition in this.myinfo.Partitions)
+                sp += partition + " ";
+
+            Console.WriteLine($"Server Master of: {mp}");
+            Console.WriteLine($"Replicated Partitions: {sp}");
+            Console.WriteLine("Freeze: " + (this.isFreezing ? "YES" : "NO"));
+            Console.WriteLine("---------------------");
+
+            return Task.FromResult(new StatusReply { });
+        }
+
         public override Task<BroadcastMessageReply> BroadcastMsg(BroadcastMessageRequest request, ServerCallContext context)
         {
-            lock(this)
+            this.tryFreeze();
+            Thread.Sleep((new Random()).Next(myinfo.Mindelay, myinfo.Maxdelay));
+
+            lock (this)
             {
                 dataStorage[(request.PartitionId, request.ObjectId)] = request.Message;
             }
@@ -100,6 +167,7 @@ namespace ServerSP
 
         public override Task<ReadReply> Read(ReadRequest request, ServerCallContext context)
         {
+            this.tryFreeze();
             Console.WriteLine("Executing read command...");
 
             Thread.Sleep((new Random()).Next(myinfo.Mindelay, myinfo.Maxdelay));
@@ -124,7 +192,7 @@ namespace ServerSP
 
         public override Task<WriteReply> Write(WriteRequest request, ServerCallContext context)
         {
-
+            this.tryFreeze();
             Console.WriteLine("Executing write command...");
             Thread.Sleep((new Random()).Next(myinfo.Mindelay, myinfo.Maxdelay));
 
@@ -142,6 +210,7 @@ namespace ServerSP
 
         public override Task<ListServerReply> ListServer(ListServerRequest request, ServerCallContext context)
         {
+            this.tryFreeze();
             Console.WriteLine("Executing list server command...");
 
             Thread.Sleep((new Random()).Next(myinfo.Mindelay, myinfo.Maxdelay));
@@ -159,7 +228,19 @@ namespace ServerSP
 
             return Task.FromResult(new ListServerReply { Objects = res });
         }
+        
+        public override Task<FreezeReply> Freeze(FreezeRequest request, ServerCallContext context)
+        {
+            this.isFreezing = true;
+            return Task.FromResult(new FreezeReply { });
+        }
 
+        public override Task<UnFreezeReply> UnFreeze(UnFreezeRequest request, ServerCallContext context)
+        {
+            this.unFreeze();
+            return Task.FromResult(new UnFreezeReply { });
+        }
+        
         public List<string> findServersByPartition(string partitionId)
         {
             List<string> res = new List<string>();
@@ -172,6 +253,25 @@ namespace ServerSP
             return res;
         }
 
+        public void tryFreeze()
+        {
+            lock (this.fLock)
+            {
+                if (isFreezing)
+                    Monitor.Wait(this.fLock);
+            }
+        }
+
+        public void unFreeze()
+        {
+            lock (this.fLock)
+            {
+                if (isFreezing)
+                    Monitor.PulseAll(this.fLock);
+                this.isFreezing = false;
+            }
+        }
+
     }
 
     class Program
@@ -181,13 +281,18 @@ namespace ServerSP
         {
 
             Uri uri = new Uri(args[0].Split("|")[1]);
-            
 
+            //ServerInterceptor interceptor = new ServerInterceptor();
+            /*
             Server server = new Server
             {
                 Services = { ServerService.BindService(new ServerServices(args)) },
                 Ports = { new ServerPort(uri.Host, uri.Port, ServerCredentials.Insecure) }
             };
+            */
+            Server server = new Server();
+            server.Services.Add(ServerService.BindService(new ServerServices(args, server)));
+            server.Ports.Add(new ServerPort(uri.Host, uri.Port, ServerCredentials.Insecure));
 
             server.Start();
             Console.WriteLine($"Server listening on host {uri.Host} and port {uri.Port}");

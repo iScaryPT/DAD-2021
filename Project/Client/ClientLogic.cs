@@ -13,6 +13,7 @@ namespace ClientLogicSP
         private GrpcChannel channel;
         private ServerService.ServerServiceClient client;
         private string serverUrl;
+        private int maxTries = 3;
 
         List<ServerInfo> serversi = new List<ServerInfo>();
         public ClientLogic(string[]args) {
@@ -25,51 +26,77 @@ namespace ClientLogicSP
 
         public void Connect(string host)
         {
+
             if (this.channel != null)
                 this.shutDown();
-            serverUrl = host;
+
             AppContext.SetSwitch(
                     "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
             channel = GrpcChannel.ForAddress(host);
             client = new ServerService.ServerServiceClient(channel);
-            Console.WriteLine($"Client connected to {host}");
+            Console.WriteLine($"Changing server to {host} ....");
+            serverUrl = host;
         }
 
         public string Read(string partitionId, string objectId, string serverId) {
 
+
             if (this.client == null)
             {
                 int idx = (new Random()).Next(0, serversi.Count);
-                this.serverUrl = serversi[idx].Url;
-                this.Connect(serverUrl);                
+                this.Connect(serversi[idx].Url);                
             }
-            
 
-
-            ReadReply reply = client.Read(new ReadRequest
+            string response = "N/A";
+       
+            try
             {
-                ObjectId = objectId,
-                PartitionId = partitionId
-            });
-
-            if (reply.ObjectValue.Equals("N/A") && !serverId.Equals("-1"))
-            {
-                string url = findServerbyId(serverId);
-                
-                if (!serverUrl.Equals(url))
-                {
-                    this.Connect(url);
-
-                }
-                reply = client.Read(new ReadRequest
+                ReadReply reply = client.Read(new ReadRequest
                 {
                     ObjectId = objectId,
                     PartitionId = partitionId
                 });
+
+                response = reply.ObjectValue;
+
+            } catch (Exception) 
+            {
+                Console.WriteLine($"Server {this.serverUrl} not available.");
+                this.channel = null;
+                this.client = null;
+                this.serverUrl = "";
+            }
+            
+
+            if (response.Equals("N/A") && !serverId.Equals("-1"))
+            {
+                string url = findServerbyId(serverId);
+ 
+                if (!serverUrl.Equals(url))
+                {
+                    this.Connect(url);
+                }
+
+                try
+                {
+                    response = client.Read(new ReadRequest
+                    {
+                        ObjectId = objectId,
+                        PartitionId = partitionId
+                    }).ObjectValue;
+                }
+                catch (Exception) 
+                {
+                    Console.WriteLine($"Server {this.serverUrl} not available.");
+                    this.channel =  null;
+                    this.client = null;
+                    this.serverUrl = "";
+                }
             }
 
             //ignore my broken pipe it still works
-            return reply.ObjectValue.ToString();
+            return response;
         }
         public bool Write(string partitionId, string objectId, string value) {
 
@@ -118,8 +145,12 @@ namespace ClientLogicSP
         {
             channel.ShutdownAsync().Wait();
         }
-
-
+        /*
+        public void freeze(string server)
+        {
+            FreezeReply reply = client.Freeze(new FreezeRequest { });
+        }
+        */
 
         public string findMasterbyPartition(string partitionId)
         {
