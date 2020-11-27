@@ -13,7 +13,6 @@ namespace ClientLogicSP
         private GrpcChannel channel;
         private ServerService.ServerServiceClient client;
         private string serverUrl;
-        private int maxTries = 3;
 
         List<ServerInfo> serversi = new List<ServerInfo>();
         public ClientLogic(string[]args) {
@@ -103,15 +102,15 @@ namespace ClientLogicSP
             return response;
         }
         public bool Write(string partitionId, string objectId, string value) {
-
+            WriteReply reply = new WriteReply();
             string tmpUrl = findMasterbyPartition(partitionId);
             if (this.client == null || !serverUrl.Equals(tmpUrl))
             {  
                 this.Connect(tmpUrl);
             }
 
-            try(){
-                WriteReply reply = client.Write(new WriteRequest
+            try{
+                reply = client.Write(new WriteRequest
                 {
 
                     PartitionId = partitionId,
@@ -125,11 +124,9 @@ namespace ClientLogicSP
                 this.channel = null;
                 this.client = null;
                 this.serverUrl = "";
-
-                removeServerIdfromList(tmpUrl);
+                reply.Ok = false;
+                //removeServerIdfromList(tmpUrl);
             }
-
-            
 
             return reply.Ok;
         }
@@ -199,7 +196,7 @@ namespace ClientLogicSP
         {
             string serverid = "";
             foreach (ServerInfo si in serversi){
-                if (si.Url.Equals(url){
+                if (si.Url.Equals(url)){
                     serverid = si.Name;
                     serversi.Remove(si);
                 }
@@ -208,7 +205,7 @@ namespace ClientLogicSP
             {
                 if (si.Partitions.Contains(serverid))
                 {
-                    si.Partitions.Remove(serverid)
+                    si.Partitions.Remove(serverid);
                 }
             }
         }

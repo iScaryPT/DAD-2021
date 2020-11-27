@@ -13,31 +13,6 @@ using Newtonsoft.Json.Linq;
 
 namespace ServerSP
 {
-    /*
-    class ServerInterceptor : Interceptor
-    {
-        private bool is_intercepting;
-
-        public ServerInterceptor()
-        {
-            this.is_intercepting = false;
-        }
-
-        public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(TRequest request, ServerCallContext context, UnaryServerMethod<TRequest, TResponse> continuation)
-        {
-            while (!is_intercepting)
-                await Task.Delay(25);
-
-            var response = await base.UnaryServerHandler(request, context, continuation);
-            return response;
-        }
-
-        public void intercept()
-        {
-            this.is_intercepting = !this.is_intercepting;
-        }
-    }
-    */
 
     class ServerInfo
     {
@@ -65,28 +40,25 @@ namespace ServerSP
             this.mindelay = Int32.Parse(ser[4]);
             this.maxdelay = Int32.Parse(ser[5]);
         }
-
-
     }
 
     class ServerServices : ServerService.ServerServiceBase
     {
 
         Dictionary<(string, string), string> dataStorage = new Dictionary<(string, string), string>();
+        Dictionary<(string, string), int> objectSequenceNum = new Dictionary<(string, string), int>();
 
         ServerInfo myinfo;
 
         List<ServerInfo> serversinfo = new List<ServerInfo>();
 
-        //works for stablish a connection to all servers
+        //works for establish a connection to all servers
         private GrpcChannel channel;
         private ServerService.ServerServiceClient server;
-        //private ServerInterceptor interceptor;
 
         private bool isFreezing;
         private object fLock;
-
-        private Server s;
+        private string inspectUrl;
 
         public void BroadCastMessage(string host, string partitionId, string objectId, string value)
         {
@@ -105,7 +77,7 @@ namespace ServerSP
             });
         }
 
-        public ServerServices(string[] args, Server server) {
+        public ServerServices(string[] args) {
 
             myinfo = new ServerInfo(args[0]);
 
@@ -114,10 +86,11 @@ namespace ServerSP
                 serversinfo.Add( new ServerInfo(args[i]));
             }
 
-            //this.interceptor = interceptor;
             this.isFreezing = false;
             this.fLock = new object();
-            this.s = server;
+            this.inspectUrl = "";
+            
+            Task.Run(() => chooseGuardian());
         }
 
         public void shutDown()
@@ -125,11 +98,93 @@ namespace ServerSP
             channel.ShutdownAsync().Wait();
         }
 
-
-        public override Task<CrashReply> Crash(CrashRequest request, ServerCallContext context)
+        public void chooseGuardian()
         {
-            this.s.ShutdownAsync().Wait();
-            return Task.FromResult(new CrashReply { });
+            Thread.Sleep(2000);
+
+            GrpcChannel channel;
+            ServerService.ServerServiceClient server;
+            GuardianReply reply = new GuardianReply { Ok = false };
+            int guardianIdx = 0;
+            List<ServerInfo> serversInfo = new List<ServerInfo>(this.serversinfo);
+
+            if (this.myinfo.Master[0].Equals("null"))
+            {
+                return;
+            }
+
+            while (reply.Ok == false)
+            {
+                if(serversInfo.Count == 0)
+                {
+                    return;
+                }
+                guardianIdx = (new Random()).Next(0, serversInfo.Count - 1);
+                AppContext.SetSwitch(
+                    "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+                channel = GrpcChannel.ForAddress(serversInfo[guardianIdx].Url);
+                server = new ServerService.ServerServiceClient(channel);
+                try
+                {
+                    reply = server.guardianRequest(new GuardianRequest { Url = myinfo.Url});
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine($"Can't connect to {serversInfo[guardianIdx].Url}");
+                    serversInfo.Remove(serversInfo[guardianIdx]);
+                    channel.ShutdownAsync().Wait();
+                }
+                serversInfo.Remove(serversInfo[guardianIdx]);
+            }
+        }
+
+        public Task pingInit()
+        {
+            GrpcChannel channel;
+            ServerService.ServerServiceClient server;
+            
+            AppContext.SetSwitch(
+                    "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            channel = GrpcChannel.ForAddress(this.inspectUrl);
+            server = new ServerService.ServerServiceClient(channel);
+            Console.WriteLine($"Pinging to {this.inspectUrl} ...");
+
+            while (true)
+            {
+                Thread.Sleep(500);
+                try
+                {
+                    PingReply reply = server.Ping(new PingRequest { });
+                }
+                catch (Exception)
+                {
+                    //Server might have died
+                    //TODO: Election Day
+                    this.inspectUrl = "";
+                    channel.ShutdownAsync().Wait();
+                    return Task.FromResult(new object());
+                }
+            }
+        }
+
+        public override Task<GuardianReply> guardianRequest(GuardianRequest request, ServerCallContext context)
+        {
+            if (!this.inspectUrl.Equals(""))
+            {
+                return Task.FromResult(new GuardianReply { Ok = false });
+            }
+            else
+            {
+                this.inspectUrl = request.Url;
+                //In case it isn't a guardian yet
+                Task.Run(() => pingInit());
+                return Task.FromResult(new GuardianReply { Ok = true });
+            }
+        }
+
+        public override Task<PingReply> Ping(PingRequest request, ServerCallContext context)
+        {
+            return Task.FromResult(new PingReply { });
         }
 
         public override Task<StatusReply> Status( StatusRequest request, ServerCallContext context)
@@ -147,6 +202,7 @@ namespace ServerSP
             Console.WriteLine($"Server Master of: {mp}");
             Console.WriteLine($"Replicated Partitions: {sp}");
             Console.WriteLine("Freeze: " + (this.isFreezing ? "YES" : "NO"));
+            Console.WriteLine("Pinging to: " + (this.inspectUrl.Equals("") ? "None" : inspectUrl));
             Console.WriteLine("---------------------");
 
             return Task.FromResult(new StatusReply { });
@@ -159,6 +215,14 @@ namespace ServerSP
 
             lock (this)
             {
+                if (!dataStorage.ContainsKey((request.PartitionId, request.ObjectId)))
+                {
+                    objectSequenceNum[(request.PartitionId, request.ObjectId)] = 1;
+                }
+                else
+                {
+                    objectSequenceNum[(request.PartitionId, request.ObjectId)]++;
+                }
                 dataStorage[(request.PartitionId, request.ObjectId)] = request.Message;
             }
 
@@ -182,8 +246,6 @@ namespace ServerSP
                     res = "N/A";
                 }
             }
-
-            
             return Task.FromResult(new ReadReply
             {
                 ObjectValue = res
@@ -200,6 +262,14 @@ namespace ServerSP
 
             lock (this)
             {
+                if (!dataStorage.ContainsKey((request.PartitionId, request.ObjectId)))
+                {
+                    objectSequenceNum[(request.PartitionId, request.ObjectId)] = 1;
+                }
+                else
+                {
+                    objectSequenceNum[(request.PartitionId, request.ObjectId)]++;
+                }
                 dataStorage[(request.PartitionId, request.ObjectId)] = request.ObjectValue;
                 foreach (string host in allUrls)
                     this.BroadCastMessage(host, request.PartitionId, request.ObjectId, request.ObjectValue);
@@ -221,7 +291,8 @@ namespace ServerSP
             lock (this)
             {
                 foreach(KeyValuePair<(string, string),string> pair in dataStorage){
-                    res += "<" + pair.Key.Item1 + "," + pair.Key.Item2 + "> : " + pair.Value;
+                    res += "<" + pair.Key.Item1 + "," + pair.Key.Item2 + "> : " + pair.Value 
+                        + " - SeqNum: " + objectSequenceNum[(pair.Key.Item1, pair.Key.Item2)];
                     res += (master.Contains(pair.Key.Item1)) ? " - MASTER\r\n" : "\r\n";
                 }
             }
@@ -281,18 +352,11 @@ namespace ServerSP
         {
 
             Uri uri = new Uri(args[0].Split("|")[1]);
-
-            //ServerInterceptor interceptor = new ServerInterceptor();
-            /*
             Server server = new Server
             {
                 Services = { ServerService.BindService(new ServerServices(args)) },
                 Ports = { new ServerPort(uri.Host, uri.Port, ServerCredentials.Insecure) }
             };
-            */
-            Server server = new Server();
-            server.Services.Add(ServerService.BindService(new ServerServices(args, server)));
-            server.Ports.Add(new ServerPort(uri.Host, uri.Port, ServerCredentials.Insecure));
 
             server.Start();
             Console.WriteLine($"Server listening on host {uri.Host} and port {uri.Port}");

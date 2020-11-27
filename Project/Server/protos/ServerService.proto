@@ -9,6 +9,8 @@ service ServerService {
   rpc UnFreeze (UnFreezeRequest) returns (UnFreezeReply);
   rpc Crash (CrashRequest) returns (CrashReply);
   rpc Status (StatusRequest) returns (StatusReply);
+  rpc guardianRequest (GuardianRequest) returns (GuardianReply);
+  rpc Ping (PingRequest) returns (PingReply);
 }
 
 message ReadRequest {
@@ -49,7 +51,6 @@ message FreezeRequest {}
 
 message FreezeReply {}
 
-
 message UnFreezeRequest {}
 
 message UnFreezeReply {}
@@ -57,6 +58,15 @@ message UnFreezeReply {}
 message CrashRequest {}
 message CrashReply {}
 
-
 message StatusRequest {}
 message StatusReply {}
+
+message GuardianRequest {
+	string url = 1;
+}
+message GuardianReply {
+	bool Ok = 1;
+}
+
+message PingRequest {}
+message PingReply {}
