@@ -11,6 +11,16 @@ service ServerService {
   rpc Status (StatusRequest) returns (StatusReply);
   rpc guardianRequest (GuardianRequest) returns (GuardianReply);
   rpc Ping (PingRequest) returns (PingReply);
+  rpc GetPartitionObjects (PartitionObjectsRequest) returns (PartitionObjectsReply);
+  rpc UpdateMaster (UpdateMasteRequest) returns (UpdateMasterReply);
+  rpc AnnounceNewMaster (AnnounceRequest) returns (AnnounceReply);
+}
+
+message ServerObjectInfo {
+	string partitionId = 1;
+	string objectId = 2;
+	string objectValue = 3;
+	int32 objectSeqNum = 4;
 }
 
 message ReadRequest {
@@ -32,7 +42,6 @@ message WriteReply {
 	bool ok = 1;
 }
 
-
 message ListServerRequest {}
 
 message ListServerReply {
@@ -43,6 +52,7 @@ message BroadcastMessageRequest {
 	string partitionId = 1;
 	string objectId = 2;
 	string message = 3;
+	int32 objectSeqNum = 4;
 }
 
 message BroadcastMessageReply {} 
@@ -69,4 +79,27 @@ message GuardianReply {
 }
 
 message PingRequest {}
+
 message PingReply {}
+
+message PartitionObjectsRequest {
+	string partitionId = 1;
+}
+
+message PartitionObjectsReply {
+	repeated ServerObjectInfo objectInfo = 1;
+}
+message UpdateMasteRequest {
+	repeated string masterPartitions = 1;
+	repeated ServerObjectInfo objectInfo = 2;
+	string deadMasterId = 3;
+}
+
+message UpdateMasterReply {	}
+
+message AnnounceRequest {
+	string newMasterId = 1;
+	string deadMasterId = 2;
+	repeated string newMasterPartitions = 3;
+}
+message AnnounceReply {}
