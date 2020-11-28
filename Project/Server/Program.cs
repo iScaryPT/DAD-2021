@@ -34,9 +34,28 @@ namespace ServerSP
         {
             string[] ser = info.Split("|");
             this.name = ser[0];
+            Console.WriteLine($"Hi! My name is {name} ...");
             this.url = ser[1];
-            this.master = new List<string>(ser[2].Split(","));
+            List<string> masterP = new List<string>(ser[2].Split(","));
+            if (masterP.Contains("null"))
+            {
+                this.master = new List<string>();
+            }
+            else
+            {
+                this.master = new List<string>(masterP);
+                this.master.Remove("");
+                foreach(string mp in master)
+                {
+                    Console.WriteLine($"I am master of {mp} ...");
+                }
+            }
             this.partitions = new List<string>(ser[3].Split(","));
+            this.partitions.Remove("");
+            foreach(string p in partitions)
+            {
+                Console.WriteLine($"I belong to {p} ...");
+            }
             this.mindelay = Int32.Parse(ser[4]);
             this.maxdelay = Int32.Parse(ser[5]);
         }
@@ -123,8 +142,9 @@ namespace ServerSP
             this.fLock = new object();
             this.vipLock = new object();
             this.vipUrl = "";
+            this.guardianUrl = "";
 
-            if (!myinfo.Master.Contains("null"))
+            if (!(myinfo.Master.Count == 0))
             {
                 Task.Run(() => guardianSetup());
             }
@@ -137,6 +157,7 @@ namespace ServerSP
 
         public void guardianSetup()
         {
+            Console.WriteLine($"<New Task> Will now proceed to setup with a guardian...");
             while (chooseGuardian())
             {
                 pingGuardian();
@@ -164,6 +185,7 @@ namespace ServerSP
                     "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
                 channel = GrpcChannel.ForAddress(serversInfo[guardianIdx].Url);
                 server = new ServerService.ServerServiceClient(channel);
+                //Console.WriteLine($"Will try to make {serversInfo[guardianIdx].Url} my new guardian...");
                 try
                 {
                     reply = server.guardianRequest(new GuardianRequest { Url = myinfo.Url});
@@ -251,7 +273,8 @@ namespace ServerSP
             ServerInfo deadMaster = getServerByUrl(this.vipUrl);
             string newMasterUrl = deadMaster.Url;
             int newMasterIdx = 0;
-            int deadMasterPartitions = deadMaster.Partitions.Count;
+            int deadMasterPartitions = deadMaster.Master.Count;
+            Console.WriteLine($"The dead master {deadMaster.Url} was master of {deadMasterPartitions} partitions...");
 
             while (newMasterUrl.Equals(deadMaster.Url))
             {
@@ -260,10 +283,12 @@ namespace ServerSP
             }
 
             newMaster = serversinfo[newMasterIdx];
+            Console.WriteLine($"{newMasterUrl} is the new master...");
 
             for(int i = 0; i < deadMasterPartitions; i++)
             {
-                Dictionary<(string, string), ServerObject> updatedPartitionObjs = getUpdatedPartitionObjects(deadMaster.Partitions[i]);
+                Console.WriteLine($"Proceeding to get updates from {deadMaster.Master[i]} ...");
+                Dictionary<(string, string), ServerObject> updatedPartitionObjs = getUpdatedPartitionObjects(deadMaster.Master[i]);
                 
                 foreach(KeyValuePair<(string, string), ServerObject> pair in updatedPartitionObjs)
                 {
@@ -280,6 +305,7 @@ namespace ServerSP
             channel = GrpcChannel.ForAddress(newMasterUrl);
             server = new ServerService.ServerServiceClient(channel);
             //TODO: ERROR HANDLING
+            Console.WriteLine($"Giving the new master {newMasterUrl} the updates...");
             server.UpdateMaster(new UpdateMasteRequest { MasterPartitions = { deadMaster.Master}, 
                 ObjectInfo = { updatedDataStorage }, DeadMasterId = deadMaster.Name });
         }
@@ -290,9 +316,10 @@ namespace ServerSP
             ServerService.ServerServiceClient server;
             AppContext.SetSwitch(
                     "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-
+            Console.WriteLine($"I {myinfo.Url} am now updating myself");
             foreach (string partition in request.MasterPartitions)
             {
+                Console.WriteLine($"I am the new master of partition {partition}");
                 myinfo.Master.Add(partition);
                 if (!myinfo.Partitions.Contains(partition))
                 {
@@ -313,14 +340,18 @@ namespace ServerSP
                     dataStorage[(objInfo.PartitionId, objInfo.ObjectId)] = new ServerObject(objInfo.ObjectValue, objInfo.ObjectSeqNum);
                 }
             }
-
-            Task.Run(() => guardianSetup());
+            //LOCK HERE?
+            if (this.guardianUrl.Equals(""))
+            {
+                Console.WriteLine("It's my first time as a master! I need a guardian now...");
+                Task.Run(() => guardianSetup());
+            }
 
             foreach(ServerInfo serverInfo in serversinfo)
             {
                 channel = GrpcChannel.ForAddress(serverInfo.Url);
                 server = new ServerService.ServerServiceClient(channel);
-
+                Console.WriteLine($"Proceeding to announce myself to {serverInfo.Url} ...");
                 try
                 {
                     server.AnnounceNewMaster(new AnnounceRequest { DeadMasterId = request.DeadMasterId, 
@@ -328,7 +359,7 @@ namespace ServerSP
                     channel.ShutdownAsync().Wait();
                 } catch(Exception)
                 {
-                    Console.WriteLine($"Couldn't announce to {serverInfo.Url} ...");
+                    Console.WriteLine($"Couldn't announce that i'm new master to {serverInfo.Url} ...");
                     channel.ShutdownAsync().Wait();
                 }
             }
@@ -341,11 +372,14 @@ namespace ServerSP
 
         public void broadcastObjsToReplicas(List<ServerObjectInfo> objsInfo, List<string> masterPartitions)
         {
+            Console.WriteLine("Broadcasting the updates to my homies...");
             foreach (string partition in masterPartitions)
             {
+                Console.WriteLine($"Time to update partition {partition} ...");
                 List<string> replicaUrls = findServersByPartition(partition);
                 foreach(string url in replicaUrls)
                 {
+                    Console.WriteLine($"{url} is going to receive the new updates...");
                     foreach (ServerObjectInfo info in objsInfo) {
                         if (info.PartitionId.Equals(partition)) {
                             BroadCastMessage(url, info.PartitionId, info.ObjectId, info.ObjectValue, info.ObjectSeqNum);
@@ -411,8 +445,15 @@ namespace ServerSP
             Console.WriteLine("-------[Debug]-------");
 
             string mp = "";
-            foreach (string s in this.myinfo.Master)
-                mp += s + " ";
+            if (myinfo.Master.Count == 0)
+            {
+                mp = "None";
+            }
+            else
+            {
+                foreach (string s in this.myinfo.Master)
+                    mp += s + " ";
+            }
 
             string sp = "";
             foreach (string partition in this.myinfo.Partitions)
@@ -541,13 +582,22 @@ namespace ServerSP
             AppContext.SetSwitch(
                     "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
+            Console.WriteLine($"Getting the updated partition objects of partition {partitionId} ...");
+
             List<string> partitionMembers = findServersByPartition(partitionId);
+
+            if (myinfo.Partitions.Contains(partitionId))
+            {
+                partitionMembers.Add(myinfo.Url);
+            }
 
             foreach(string url in partitionMembers)
             {
+                Console.WriteLine($"It's {url} turn to give updates...");
                if(url.Equals(myinfo.Url))
                {
-                  //CHECK LOCK
+                   //CHECK LOCK
+                   Console.WriteLine($"I {myinfo.Url} am a member of this partition...");
                    foreach(KeyValuePair<(string, string), ServerObject> pair in dataStorage)
                     {
                         if (pair.Key.Item1.Equals(partitionId))
@@ -575,6 +625,7 @@ namespace ServerSP
                     server = new ServerService.ServerServiceClient(channel);
                     try
                     {
+                        Console.WriteLine($"Will try to connect to {url} to get updates of {partitionId}...");
                         PartitionObjectsReply reply = server.GetPartitionObjects(new PartitionObjectsRequest { PartitionId = partitionId });
                         foreach(ServerObjectInfo objInfo in reply.ObjectInfo)
                         {
@@ -596,11 +647,12 @@ namespace ServerSP
                     }
                     catch (Exception)
                     {
-                        Console.WriteLine($"Couldn't get the partition's update from {url} ...");
+                        Console.WriteLine($"Couldn't get the partition's {partitionId} update from {url} ...");
                         channel.ShutdownAsync().Wait();
                     }
                }
             }
+            Console.WriteLine($"Got all updates from {partitionId}! Sending it to new master...");
             return updatedPartition;
         }
 
