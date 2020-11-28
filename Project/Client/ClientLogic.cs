@@ -64,7 +64,8 @@ namespace ClientLogicSP
                 Console.WriteLine($"Server {this.serverUrl} not available.");
                 this.channel = null;
                 this.client = null;
-                removeServerUrlfromList(serverUrl);
+                //TODO Look better at this
+                //removeServerUrlfromList(serverUrl);
                 this.serverUrl = "";
                
             }
@@ -92,7 +93,7 @@ namespace ClientLogicSP
                     Console.WriteLine($"Server {this.serverUrl} not available.");
                     this.channel =  null;
                     this.client = null;
-                    removeServerUrlfromList(serverUrl);
+                    //removeServerUrlfromList(serverUrl);
                     this.serverUrl = "";
                     
                 }

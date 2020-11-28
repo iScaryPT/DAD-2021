@@ -58,7 +58,9 @@ namespace ServerSP
 
         private bool isFreezing;
         private object fLock;
-        private string inspectUrl;
+        private string guardianUrl;
+        private string vipUrl;
+        private object vipLock;
 
         public void BroadCastMessage(string host, string partitionId, string objectId, string value)
         {
@@ -68,13 +70,20 @@ namespace ServerSP
                     "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             channel = GrpcChannel.ForAddress(host);
             server = new ServerService.ServerServiceClient(channel);
-            Console.WriteLine($"Broadcasting write to {host} ...");
-
-            server.BroadcastMsg(new BroadcastMessageRequest { 
-                PartitionId = partitionId,
-                ObjectId = objectId,
-                Message = value
-            });
+            try
+            {
+                server.BroadcastMsg(new BroadcastMessageRequest
+                {
+                    PartitionId = partitionId,
+                    ObjectId = objectId,
+                    Message = value
+                });
+                Console.WriteLine($"Broadcasting write to {host} ...");
+            } catch (Exception)
+            {
+                Console.WriteLine($"Broadcast to server {host} failed...");
+            }
+            
         }
 
         public ServerServices(string[] args) {
@@ -88,9 +97,13 @@ namespace ServerSP
 
             this.isFreezing = false;
             this.fLock = new object();
-            this.inspectUrl = "";
-            
-            Task.Run(() => chooseGuardian());
+            this.vipLock = new object();
+            this.vipUrl = "";
+
+            if (!myinfo.Master.Contains("null"))
+            {
+                Task.Run(() => guardianSetup());
+            }
         }
 
         public void shutDown()
@@ -98,7 +111,15 @@ namespace ServerSP
             channel.ShutdownAsync().Wait();
         }
 
-        public void chooseGuardian()
+        public void guardianSetup()
+        {
+            while (chooseGuardian())
+            {
+                pingGuardian();
+            }
+        }
+
+        public bool chooseGuardian()
         {
             Thread.Sleep(2000);
 
@@ -108,16 +129,11 @@ namespace ServerSP
             int guardianIdx = 0;
             List<ServerInfo> serversInfo = new List<ServerInfo>(this.serversinfo);
 
-            if (this.myinfo.Master[0].Equals("null"))
-            {
-                return;
-            }
-
             while (reply.Ok == false)
             {
                 if(serversInfo.Count == 0)
                 {
-                    return;
+                    return false;
                 }
                 guardianIdx = (new Random()).Next(0, serversInfo.Count - 1);
                 AppContext.SetSwitch(
@@ -130,24 +146,25 @@ namespace ServerSP
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine($"Can't connect to {serversInfo[guardianIdx].Url}");
+                    Console.WriteLine($"Can't connect to guardian {serversInfo[guardianIdx].Url}");
                     serversInfo.Remove(serversInfo[guardianIdx]);
                     channel.ShutdownAsync().Wait();
                 }
-                serversInfo.Remove(serversInfo[guardianIdx]);
             }
+            this.guardianUrl = serversInfo[guardianIdx].Url;
+            return true;
         }
 
-        public Task pingInit()
+        public void pingGuardian()
         {
             GrpcChannel channel;
             ServerService.ServerServiceClient server;
-            
+
             AppContext.SetSwitch(
                     "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            channel = GrpcChannel.ForAddress(this.inspectUrl);
+            channel = GrpcChannel.ForAddress(this.guardianUrl);
             server = new ServerService.ServerServiceClient(channel);
-            Console.WriteLine($"Pinging to {this.inspectUrl} ...");
+            Console.WriteLine($"Pinging to guardian {this.guardianUrl} ...");
 
             while (true)
             {
@@ -158,28 +175,58 @@ namespace ServerSP
                 }
                 catch (Exception)
                 {
-                    //Server might have died
-                    //TODO: Election Day
-                    this.inspectUrl = "";
+                    //Guardian might have died
                     channel.ShutdownAsync().Wait();
-                    return Task.FromResult(new object());
+                    return;
+                }
+            }
+        }
+
+        public void pingVip()
+        {
+            GrpcChannel channel;
+            ServerService.ServerServiceClient server;
+
+            AppContext.SetSwitch(
+                    "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            channel = GrpcChannel.ForAddress(this.vipUrl);
+            server = new ServerService.ServerServiceClient(channel);
+            Console.WriteLine($"Pinging to VIP {this.vipUrl} ...");
+
+            while (true)
+            {
+                Thread.Sleep(500);
+                try
+                {
+                    PingReply reply = server.Ping(new PingRequest { });
+                }
+                catch (Exception)
+                {
+                    //Master might have died
+                    //TODO ELECTION DAY
+                    lock (vipLock)
+                    {
+                        this.vipUrl = "";
+                    }
+                    channel.ShutdownAsync().Wait();
+                    return;
                 }
             }
         }
 
         public override Task<GuardianReply> guardianRequest(GuardianRequest request, ServerCallContext context)
         {
-            if (!this.inspectUrl.Equals(""))
+            lock (vipLock)
             {
-                return Task.FromResult(new GuardianReply { Ok = false });
+                if (!this.vipUrl.Equals(""))
+                {
+                    return Task.FromResult(new GuardianReply { Ok = false });
+                }
+                this.vipUrl = request.Url;
             }
-            else
-            {
-                this.inspectUrl = request.Url;
-                //In case it isn't a guardian yet
-                Task.Run(() => pingInit());
-                return Task.FromResult(new GuardianReply { Ok = true });
-            }
+            //In case it isn't a guardian yet
+            Task.Run(() => pingVip());
+            return Task.FromResult(new GuardianReply { Ok = true });
         }
 
         public override Task<PingReply> Ping(PingRequest request, ServerCallContext context)
@@ -202,7 +249,8 @@ namespace ServerSP
             Console.WriteLine($"Server Master of: {mp}");
             Console.WriteLine($"Replicated Partitions: {sp}");
             Console.WriteLine("Freeze: " + (this.isFreezing ? "YES" : "NO"));
-            Console.WriteLine("Pinging to: " + (this.inspectUrl.Equals("") ? "None" : inspectUrl));
+            Console.WriteLine("Pinging to VIP: " + (this.vipUrl.Equals("") ? "None" : this.vipUrl));
+            Console.WriteLine("Pinging to Guardian : " + (this.guardianUrl.Equals("") ? "None" : this.guardianUrl));
             Console.WriteLine("---------------------");
 
             return Task.FromResult(new StatusReply { });
