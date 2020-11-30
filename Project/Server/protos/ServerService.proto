@@ -92,7 +92,6 @@ message PartitionObjectsReply {
 }
 message UpdateMasteRequest {
 	string masterPartition = 1;
-	repeated ServerObjectInfo objectInfo = 2;
 	string deadMasterId = 3;
 }
 
