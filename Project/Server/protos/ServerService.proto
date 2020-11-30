@@ -91,7 +91,7 @@ message PartitionObjectsReply {
 	repeated ServerObjectInfo objectInfo = 1;
 }
 message UpdateMasteRequest {
-	repeated string masterPartitions = 1;
+	string masterPartition = 1;
 	repeated ServerObjectInfo objectInfo = 2;
 	string deadMasterId = 3;
 }
@@ -101,7 +101,7 @@ message UpdateMasterReply {	}
 message AnnounceRequest {
 	string newMasterId = 1;
 	string deadMasterId = 2;
-	repeated string newMasterPartitions = 3;
+	string newMasterPartition = 3;
 }
 message AnnounceReply {}
 

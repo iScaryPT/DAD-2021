@@ -39,8 +39,7 @@ namespace ClientLogicSP
         }
 
         public string Read(string partitionId, string objectId, string serverId) {
-
-
+            bool alternWorked = false;
             if (this.client == null)
             {
                 int idx = (new Random()).Next(0, serversi.Count);
@@ -48,54 +47,82 @@ namespace ClientLogicSP
             }
 
             string response = "N/A";
-       
-            try
+            int serverIdx = serversi.FindIndex(serv => serv.Url.Equals(this.serverUrl));
+
+            if (serversi[serverIdx].IsAvailable)
             {
-                ReadReply reply = client.Read(new ReadRequest
+                try
                 {
-                    ObjectId = objectId,
-                    PartitionId = partitionId
-                });
+                    ReadReply reply = client.Read(new ReadRequest
+                    {
+                        ObjectId = objectId,
+                        PartitionId = partitionId
+                    });
 
-                response = reply.ObjectValue;
+                    response = reply.ObjectValue;
 
-            } catch (Exception) 
-            {
-                Console.WriteLine($"Server {this.serverUrl} not available.");
-                this.channel = null;
-                this.client = null;
-                //TODO Look better at this
-                //removeServerUrlfromList(serverUrl);
-                this.serverUrl = "";
-               
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine($"Server {this.serverUrl} not available.");
+
+                    this.channel = null;
+                    this.client = null;
+                    //TODO Look better at this
+                    int failedIdx = serversi.FindIndex(failed => failed.Url.Equals(this.serverUrl));
+                    serversi[failedIdx].IsAvailable = false;
+                    this.serverUrl = "";
+
+                }
             }
             
 
             if (response.Equals("N/A") && !serverId.Equals("-1"))
             {
                 string url = findServerbyId(serverId);
- 
-                if (!serverUrl.Equals(url))
+                while (!alternWorked)
                 {
-                    this.Connect(url);
-                }
-
-                try
-                {
-                    response = client.Read(new ReadRequest
+                    serverIdx = serversi.FindIndex(serv => serv.Url.Equals(url));
+                    if (serversi[serverIdx].IsAvailable)
                     {
-                        ObjectId = objectId,
-                        PartitionId = partitionId
-                    }).ObjectValue;
-                }
-                catch (Exception) 
-                {
-                    Console.WriteLine($"Server {this.serverUrl} not available.");
-                    this.channel =  null;
-                    this.client = null;
-                    //removeServerUrlfromList(serverUrl);
-                    this.serverUrl = "";
-                    
+                        if (!serverUrl.Equals(url))
+                        {
+                            this.Connect(url);
+                        }
+
+                        try
+                        {
+                            response = client.Read(new ReadRequest
+                            {
+                                ObjectId = objectId,
+                                PartitionId = partitionId
+                            }).ObjectValue;
+                            break;
+                        }
+                        catch (Exception)
+                        {
+                            Console.WriteLine($"Server {this.serverUrl} not available.");
+                            this.channel = null;
+                            this.client = null;
+                            //removeServerUrlfromList(serverUrl);
+                            int failedIdx = serversi.FindIndex(failed => failed.Url.Equals(this.serverUrl));
+                            serversi[failedIdx].IsAvailable = false;
+                            url = findAvailableServerByPartition(partitionId);
+                            this.serverUrl = "";
+                            if (url == null)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    else { 
+                        url = findAvailableServerByPartition(partitionId);
+                        this.serverUrl = "";
+                        if (url == null)
+                        {
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -132,7 +159,6 @@ namespace ClientLogicSP
                     reply.Ok = false;
                     maxTries--;
                     string newMaster = newPartitionMaster(partitionId, this.serverUrl);
-                    Console.WriteLine($"Trying new master {newMaster}");
                     this.Connect(newMaster);
                     //removeServerIdfromList(tmpUrl);
                 }
@@ -153,14 +179,24 @@ namespace ClientLogicSP
         }
         public string listServer(string serverId) 
         {
+            ListServerReply reply = new ListServerReply { };
             string tmpUrl = findServerbyId(serverId);
             if (this.client == null || !serverUrl.Equals(tmpUrl))
             {
                 this.Connect(tmpUrl);
             }
-
-            ListServerReply reply = client.ListServer(new ListServerRequest { });
-
+            int serverIdx = serversi.FindIndex(serv => serv.Url.Equals(tmpUrl));
+            if (serversi[serverIdx].IsAvailable)
+            {
+                try
+                {
+                    reply = client.ListServer(new ListServerRequest { });
+                }
+                catch (Exception)
+                {
+                    reply.Objects = "Not available\r\n";
+                }
+            } else { reply.Objects = "Not available\r\n"; }
             return reply.Objects;
 
         }
@@ -234,6 +270,19 @@ namespace ClientLogicSP
             return "";
         }
 
+        public string findAvailableServerByPartition(string partitionId)
+        {
+            foreach(ServerInfo server in serversi)
+            {
+                if(server.Partitions.Contains(partitionId) && server.IsAvailable)
+                {
+                    return server.Url;
+                }
+            }
+
+            return null;
+        }
+
     
         public void removeServerUrlfromList(string url)
         {
@@ -264,12 +313,14 @@ namespace ClientLogicSP
         private List<string> partitions;
         private int mindelay;
         private int maxdelay;
+        private bool isAvailable;
         public string Name { get { return name; } }
         public string Url { get { return url; } }
         public List<string> Master { get { return master; } }
         public List<string> Partitions { get { return partitions; } }
         public int Mindelay { get { return mindelay; } }
         public int Maxdelay { get { return maxdelay; } }
+        public bool IsAvailable { get { return isAvailable; } set { this.isAvailable = value; } }
 
         public ServerInfo(string info)
         {
@@ -280,6 +331,7 @@ namespace ClientLogicSP
             this.partitions = new List<string>(ser[3].Split(","));
             this.mindelay = Int32.Parse(ser[4]);
             this.maxdelay = Int32.Parse(ser[5]);
+            this.isAvailable = true;
         }
 
         public override string ToString()
