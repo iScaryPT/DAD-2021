@@ -2,7 +2,7 @@
   "profiles": {
     "ReadTxt": {
       "commandName": "Project",
-      "commandLineArgs": "\"scripts/parse.txt\""
+      "commandLineArgs": "\"scripts/pm_script1\""
     }
   }
 }

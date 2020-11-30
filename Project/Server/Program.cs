@@ -47,15 +47,9 @@ namespace ServerSP
             {
                 this.master = new List<string>(masterP);
                 this.master.Remove("");
-                foreach(string mp in master)
-                {
-                }
             }
             this.partitions = new List<string>(ser[3].Split(","));
             this.partitions.Remove("");
-            foreach(string p in partitions)
-            {
-            }
             this.mindelay = Int32.Parse(ser[4]);
             this.maxdelay = Int32.Parse(ser[5]);
             this.isAvailable = true;
@@ -89,48 +83,18 @@ namespace ServerSP
     {
 
         Dictionary<(string, string), ServerObject> dataStorage = new Dictionary<(string, string), ServerObject>();
-
         ServerInfo myinfo;
-
         List<ServerInfo> serversinfo = new List<ServerInfo>();
-
+        private object infoLock;
         //works for establish a connection to all servers
         private GrpcChannel channel;
         private ServerService.ServerServiceClient server;
-
         private bool isFreezing;
         private object fLock;
         private string guardianUrl;
         private string vipUrl;
         private object vipLock;
-
-        public void BroadCastMessage(string host, string partitionId, string objectId, string value, int objSeqNum)
-        {
-            if (this.channel != null)
-                this.shutDown();
-            AppContext.SetSwitch(
-                    "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            channel = GrpcChannel.ForAddress(host);
-            server = new ServerService.ServerServiceClient(channel);
-            try
-            {
-                server.BroadcastMsg(new BroadcastMessageRequest
-                {
-                    PartitionId = partitionId,
-                    ObjectId = objectId,
-                    Message = value,
-                    ObjectSeqNum = objSeqNum
-                });
-                Console.WriteLine($"Broadcasting write to {host} ...");
-            } catch (Exception)
-            {
-                Console.WriteLine($"Broadcast to server {host} failed...");
-                int failedIdx = serversinfo.FindIndex(failed => failed.Url.Equals(host));
-                serversinfo[failedIdx].IsAvailable = false;
-            }
-            
-        }
-
+        
         public ServerServices(string[] args) {
 
             myinfo = new ServerInfo(args[0]);
@@ -143,6 +107,7 @@ namespace ServerSP
             this.isFreezing = false;
             this.fLock = new object();
             this.vipLock = new object();
+            this.infoLock = new object();
             this.vipUrl = "";
             this.guardianUrl = "";
 
@@ -151,12 +116,6 @@ namespace ServerSP
                 Task.Run(() => guardianSetup());
             }
         }
-
-        public void shutDown()
-        {
-            channel.ShutdownAsync().Wait();
-        }
-
         public void guardianSetup()
         {
             Console.WriteLine($"<New Task> Will now proceed to setup with a guardian...");
@@ -174,7 +133,11 @@ namespace ServerSP
             ServerService.ServerServiceClient server;
             GuardianReply reply = new GuardianReply { Ok = false };
             int guardianIdx = 0;
-            List<ServerInfo> serversInfo = new List<ServerInfo>(this.serversinfo);
+            List<ServerInfo> serversInfo;
+            lock (this.infoLock)
+            {
+                serversInfo = new List<ServerInfo>(this.serversinfo);
+            }
 
             while (reply.Ok == false)
             {
@@ -223,8 +186,11 @@ namespace ServerSP
                 catch (Exception)
                 {
                     //Guardian might have died
-                    int failedIdx = serversinfo.FindIndex(failed => failed.Url.Equals(this.guardianUrl));
-                    serversinfo[failedIdx].IsAvailable = false;
+                    lock (this.infoLock)
+                    {
+                        int failedIdx = serversinfo.FindIndex(failed => failed.Url.Equals(this.guardianUrl));
+                        serversinfo[failedIdx].IsAvailable = false;
+                    }
                     channel.ShutdownAsync().Wait();
                     return;
                 }
@@ -334,55 +300,58 @@ namespace ServerSP
             Console.WriteLine($"I {myinfo.Url} am now updating myself");
             Console.WriteLine($"I am the new master of partition {request.MasterPartition}");
             myinfo.Master.Add(request.MasterPartition);
-            //TODO Lock storage
-            foreach(ServerObjectInfo objInfo in request.ObjectInfo)
+            lock (this)
             {
-                if(dataStorage.ContainsKey((objInfo.PartitionId, objInfo.ObjectId)))
+                foreach (ServerObjectInfo objInfo in request.ObjectInfo)
                 {
-                    dataStorage[(objInfo.PartitionId, objInfo.ObjectId)].ObjValue = objInfo.ObjectValue;
-                    dataStorage[(objInfo.PartitionId, objInfo.ObjectId)].SeqNum = objInfo.ObjectSeqNum;
-                }
+                    if (dataStorage.ContainsKey((objInfo.PartitionId, objInfo.ObjectId)))
+                    {
+                        dataStorage[(objInfo.PartitionId, objInfo.ObjectId)].ObjValue = objInfo.ObjectValue;
+                        dataStorage[(objInfo.PartitionId, objInfo.ObjectId)].SeqNum = objInfo.ObjectSeqNum;
+                    }
 
-                else
-                {
-                    dataStorage[(objInfo.PartitionId, objInfo.ObjectId)] = new ServerObject(objInfo.ObjectValue, objInfo.ObjectSeqNum);
+                    else
+                    {
+                        dataStorage[(objInfo.PartitionId, objInfo.ObjectId)] = new ServerObject(objInfo.ObjectValue, objInfo.ObjectSeqNum);
+                    }
                 }
             }
-            //LOCK HERE?
+            
             if (this.guardianUrl.Equals(""))
             {
                 Console.WriteLine("It's my first time as a master! I need a guardian now...");
                 Task.Run(() => guardianSetup());
             }
-
-            foreach(ServerInfo serverInfo in serversinfo)
+            lock (this.infoLock)
             {
-                if (serverInfo.IsAvailable)
+                foreach (ServerInfo serverInfo in serversinfo)
                 {
-                    channel = GrpcChannel.ForAddress(serverInfo.Url);
-                    server = new ServerService.ServerServiceClient(channel);
-                    Console.WriteLine($"Proceeding to announce myself to {serverInfo.Url} ...");
-                    try
+                    if (serverInfo.IsAvailable)
                     {
-                        server.AnnounceNewMaster(new AnnounceRequest
+                        channel = GrpcChannel.ForAddress(serverInfo.Url);
+                        server = new ServerService.ServerServiceClient(channel);
+                        Console.WriteLine($"Proceeding to announce myself to {serverInfo.Url} ...");
+                        try
                         {
-                            DeadMasterId = request.DeadMasterId,
-                            NewMasterId = myinfo.Name,
-                            NewMasterPartition = request.MasterPartition 
-                        });
-                        channel.ShutdownAsync().Wait();
-                    }
-                    catch (Exception)
-                    {
-                        Console.WriteLine($"Couldn't announce that i'm new master to {serverInfo.Url} ...");
-                        int failedIdx = serversinfo.FindIndex(failed => failed.Url.Equals(serverInfo.Url));
-                        serversinfo[failedIdx].IsAvailable = false;
-                        channel.ShutdownAsync().Wait();
+                            server.AnnounceNewMaster(new AnnounceRequest
+                            {
+                                DeadMasterId = request.DeadMasterId,
+                                NewMasterId = myinfo.Name,
+                                NewMasterPartition = request.MasterPartition
+                            });
+                            channel.ShutdownAsync().Wait();
+                        }
+                        catch (Exception)
+                        {
+                            Console.WriteLine($"Couldn't announce that i'm new master to {serverInfo.Url} ...");
+                            int failedIdx = serversinfo.FindIndex(failed => failed.Url.Equals(serverInfo.Url));
+                            serversinfo[failedIdx].IsAvailable = false;
+                            channel.ShutdownAsync().Wait();
+                        }
                     }
                 }
             }
 
-            //broadcasting to all replicas (new method)
             broadcastObjsToReplicas(new List<ServerObjectInfo>(request.ObjectInfo), request.MasterPartition);
 
             return Task.FromResult(new UpdateMasterReply { });
@@ -407,22 +376,28 @@ namespace ServerSP
         public override Task<AnnounceReply> AnnounceNewMaster(AnnounceRequest request, ServerCallContext context)
         {
             //UPDATING NEW MASTER
-            for(int i = 0; i < serversinfo.Count; i++)
+            lock (this.infoLock)
             {
-                if (serversinfo[i].Name.Equals(request.NewMasterId))
+                for (int i = 0; i < serversinfo.Count; i++)
                 {
-                    serversinfo[i].Master.Add(request.NewMasterPartition);
+                    if (serversinfo[i].Name.Equals(request.NewMasterId))
+                    {
+                        serversinfo[i].Master.Add(request.NewMasterPartition);
+                    }
                 }
             }
 
             //ERASING DEAD MASTER
-            List<ServerInfo> serversInfo = new List<ServerInfo>(serversinfo);
-            foreach(ServerInfo server in serversInfo)
+            lock (this.infoLock)
             {
-                if (server.Name.Equals(request.DeadMasterId))
+                List<ServerInfo> serversInfo = new List<ServerInfo>(serversinfo);
+                foreach (ServerInfo server in serversInfo)
                 {
-                    serversinfo.Remove(server);
-                    break;
+                    if (server.Name.Equals(request.DeadMasterId))
+                    {
+                        serversinfo.Remove(server);
+                        break;
+                    }
                 }
             }
 
@@ -476,6 +451,40 @@ namespace ServerSP
             Console.WriteLine("---------------------");
 
             return Task.FromResult(new StatusReply { });
+        }
+        public void BroadCastMessage(string host, string partitionId, string objectId, string value, int objSeqNum)
+        {
+            if (this.channel != null)
+                this.shutDown();
+            AppContext.SetSwitch(
+                    "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            channel = GrpcChannel.ForAddress(host);
+            server = new ServerService.ServerServiceClient(channel);
+            try
+            {
+                server.BroadcastMsg(new BroadcastMessageRequest
+                {
+                    PartitionId = partitionId,
+                    ObjectId = objectId,
+                    Message = value,
+                    ObjectSeqNum = objSeqNum
+                });
+                Console.WriteLine($"Broadcasting write to {host} ...");
+            }
+            catch (Exception)
+            {
+                Console.WriteLine($"Broadcast to server {host} failed...");
+                lock (this.infoLock)
+                {
+                    int failedIdx = serversinfo.FindIndex(failed => failed.Url.Equals(host));
+                    serversinfo[failedIdx].IsAvailable = false;
+                }
+            }
+
+        }
+        public void shutDown()
+        {
+            channel.ShutdownAsync().Wait();
         }
 
         public override Task<BroadcastMessageReply> BroadcastMsg(BroadcastMessageRequest request, ServerCallContext context)
@@ -563,11 +572,6 @@ namespace ServerSP
                     int result = x.Item1.CompareTo(y.Item1);
                     return result == 0 ? x.Item2.CompareTo(y.Item2) : result;
                 });
-                /*foreach(KeyValuePair<(string, string),ServerObject> pair in dataStorage){
-                    res += "<" + pair.Key.Item1 + "," + pair.Key.Item2 + "> : " + pair.Value.ObjValue 
-                        + " - SeqNum: " + pair.Value.SeqNum;
-                    res += (master.Contains(pair.Key.Item1)) ? " - MASTER\r\n" : "\r\n";
-                }*/
                 foreach (var key in list)
                 {
                     res += "<" + key.Item1 + "," + key.Item2 + "> : " + dataStorage[key].ObjValue
@@ -577,18 +581,6 @@ namespace ServerSP
             }
 
             return Task.FromResult(new ListServerReply { Objects = res });
-        }
-        public override Task<NewPartitionMasterReply> GiveNewPartitionMaster(NewPartitionMasterRequest request, ServerCallContext context)
-        {
-            foreach(ServerInfo serverInfo in serversinfo)
-            {
-                if (serverInfo.Master.Contains(request.PartitionId))
-                {
-                    return Task.FromResult(new NewPartitionMasterReply { NewMaster = serverInfo.Url });
-                }
-            }
-
-            return Task.FromResult(new NewPartitionMasterReply { });
         }
         
         public override Task<FreezeReply> Freeze(FreezeRequest request, ServerCallContext context)
@@ -625,24 +617,25 @@ namespace ServerSP
                 Console.WriteLine($"It's {url} turn to give updates...");
                if(url.Equals(myinfo.Url))
                {
-                   //CHECK LOCK
-                   Console.WriteLine($"I {myinfo.Url} am a member of this partition...");
-                   foreach(KeyValuePair<(string, string), ServerObject> pair in dataStorage)
-                    {
-                        if (pair.Key.Item1.Equals(partitionId))
+                    lock (this) { 
+                       Console.WriteLine($"I {myinfo.Url} am a member of this partition...");
+                       foreach(KeyValuePair<(string, string), ServerObject> pair in dataStorage)
                         {
-                            if (updatedPartition.ContainsKey((pair.Key.Item1, pair.Key.Item2)))
+                            if (pair.Key.Item1.Equals(partitionId))
                             {
-                                if (updatedPartition[(pair.Key.Item1, pair.Key.Item2)].SeqNum < pair.Value.SeqNum)
+                                if (updatedPartition.ContainsKey((pair.Key.Item1, pair.Key.Item2)))
                                 {
-                                    updatedPartition[(pair.Key.Item1, pair.Key.Item2)].ObjValue = pair.Value.ObjValue;
-                                    updatedPartition[(pair.Key.Item1, pair.Key.Item2)].SeqNum = pair.Value.SeqNum;
+                                    if (updatedPartition[(pair.Key.Item1, pair.Key.Item2)].SeqNum < pair.Value.SeqNum)
+                                    {
+                                        updatedPartition[(pair.Key.Item1, pair.Key.Item2)].ObjValue = pair.Value.ObjValue;
+                                        updatedPartition[(pair.Key.Item1, pair.Key.Item2)].SeqNum = pair.Value.SeqNum;
+                                    }
                                 }
-                            }
 
-                            else
-                            {
-                                updatedPartition[(pair.Key.Item1, pair.Key.Item2)] = new ServerObject(pair.Value.ObjValue, pair.Value.SeqNum);
+                                else
+                                {
+                                    updatedPartition[(pair.Key.Item1, pair.Key.Item2)] = new ServerObject(pair.Value.ObjValue, pair.Value.SeqNum);
+                                }
                             }
                         }
                     }
@@ -684,42 +677,52 @@ namespace ServerSP
             Console.WriteLine($"Got all updates from {partitionId}! Sending it to new master...");
             return updatedPartition;
         }
-
         public override Task<PartitionObjectsReply> GetPartitionObjects(PartitionObjectsRequest request, ServerCallContext context)
         {
-            //CHECK LOCK
             List<ServerObjectInfo> objsInfo = new List<ServerObjectInfo>();
-            foreach(KeyValuePair<(string, string), ServerObject> pair in dataStorage)
+            lock (this)
             {
-                if (pair.Key.Item1.Equals(request.PartitionId))
+                foreach (KeyValuePair<(string, string), ServerObject> pair in dataStorage)
                 {
-                    objsInfo.Add(new ServerObjectInfo { PartitionId = pair.Key.Item1, ObjectId = pair.Key.Item2, 
-                        ObjectValue = pair.Value.ObjValue, ObjectSeqNum = pair.Value.SeqNum });
+                    if (pair.Key.Item1.Equals(request.PartitionId))
+                    {
+                        objsInfo.Add(new ServerObjectInfo
+                        {
+                            PartitionId = pair.Key.Item1,
+                            ObjectId = pair.Key.Item2,
+                            ObjectValue = pair.Value.ObjValue,
+                            ObjectSeqNum = pair.Value.SeqNum
+                        });
+                    }
                 }
             }
 
             return Task.FromResult(new PartitionObjectsReply { ObjectInfo = { objsInfo } });
         }
-
         public List<string> findServersByPartition(string partitionId)
         {
             List<string> res = new List<string>();
-
-            foreach(ServerInfo s in serversinfo)
+            lock (this.infoLock)
             {
-                if (s.Partitions.Contains(partitionId) && s.IsAvailable)
-                    res.Add(s.Url);
+                foreach (ServerInfo s in serversinfo)
+                {
+                    if (s.Partitions.Contains(partitionId) && s.IsAvailable)
+                        res.Add(s.Url);
+                }
             }
             return res;
         }
 
         public ServerInfo getServerByUrl(string url)
         {
-            foreach(ServerInfo server in serversinfo)
+            lock (this.infoLock)
             {
-                if (server.Url.Equals(url))
+                foreach (ServerInfo server in serversinfo)
                 {
-                    return server;
+                    if (server.Url.Equals(url))
+                    {
+                        return server;
+                    }
                 }
             }
 
@@ -743,6 +746,21 @@ namespace ServerSP
                     Monitor.PulseAll(this.fLock);
                 this.isFreezing = false;
             }
+        }
+        public override Task<NewPartitionMasterReply> GiveNewPartitionMaster(NewPartitionMasterRequest request, ServerCallContext context)
+        {
+            lock (this.infoLock)
+            {
+                foreach (ServerInfo serverInfo in serversinfo)
+                {
+                    if (serverInfo.Master.Contains(request.PartitionId))
+                    {
+                        return Task.FromResult(new NewPartitionMasterReply { NewMaster = serverInfo.Url });
+                    }
+                }
+            }
+
+            return Task.FromResult(new NewPartitionMasterReply { });
         }
 
     }
