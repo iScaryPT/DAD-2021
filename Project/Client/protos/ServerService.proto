@@ -4,6 +4,7 @@ service ServerService {
   rpc Read (ReadRequest) returns (ReadReply);
   rpc Write (WriteRequest) returns (WriteReply);
   rpc ListServer (ListServerRequest) returns (ListServerReply);
+  rpc GiveNewPartitionMaster (NewPartitionMasterRequest) returns (NewPartitionMasterReply);
 }
 
 message ReadRequest {
@@ -29,4 +30,12 @@ message ListServerRequest {}
 
 message ListServerReply {
 	string objects = 1;
+}
+
+message NewPartitionMasterRequest { 
+	string partitionId = 1;
+}
+
+message NewPartitionMasterReply {
+	string newMaster = 1;
 }

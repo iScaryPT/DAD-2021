@@ -103,30 +103,39 @@ namespace ClientLogicSP
             return response;
         }
         public bool Write(string partitionId, string objectId, string value) {
+            int maxTries = 3;
             WriteReply reply = new WriteReply();
             string tmpUrl = findMasterbyPartition(partitionId);
             if (this.client == null || !serverUrl.Equals(tmpUrl))
             {  
                 this.Connect(tmpUrl);
             }
-
-            try{
-                reply = client.Write(new WriteRequest
-                {
-
-                    PartitionId = partitionId,
-                    ObjectId = objectId,
-                    ObjectValue = value
-
-                });
-            }catch (Exception)
+            while (maxTries != 0)
             {
-                Console.WriteLine($"Server {this.serverUrl} not available.");
-                this.channel = null;
-                this.client = null;
-                this.serverUrl = "";
-                reply.Ok = false;
-                //removeServerIdfromList(tmpUrl);
+                try
+                {
+                    reply = client.Write(new WriteRequest
+                    {
+
+                        PartitionId = partitionId,
+                        ObjectId = objectId,
+                        ObjectValue = value
+
+                    });
+                    break;
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine($"Server {this.serverUrl} not available.");
+                    this.channel = null;
+                    this.client = null;
+                    reply.Ok = false;
+                    maxTries--;
+                    string newMaster = newPartitionMaster(partitionId, this.serverUrl);
+                    Console.WriteLine($"Trying new master {newMaster}");
+                    this.Connect(newMaster);
+                    //removeServerIdfromList(tmpUrl);
+                }
             }
 
             return reply.Ok;
@@ -165,6 +174,39 @@ namespace ClientLogicSP
             FreezeReply reply = client.Freeze(new FreezeRequest { });
         }
         */
+
+        public string newPartitionMaster(string partitionId, string oldMaster)
+        {
+
+            int randomServerIdx = (new Random()).Next(0, serversi.Count - 1);
+            string informantUrl = serversi[randomServerIdx].Url;
+            this.Connect(informantUrl);
+            NewPartitionMasterReply reply = this.client.GiveNewPartitionMaster(new NewPartitionMasterRequest { PartitionId = partitionId });
+            
+            foreach(ServerInfo serverInfo in serversi)
+            {
+                if (serverInfo.Url.Equals(oldMaster))
+                {
+                    serversi.Remove(serverInfo);
+                    break;
+                }
+            }
+
+            foreach(ServerInfo serverInfo in serversi)
+            {
+                if (serverInfo.Url.Equals(reply.NewMaster))
+                {
+                    serverInfo.Master.Add(partitionId);
+                    if (!serverInfo.Partitions.Contains(partitionId))
+                    {
+                        serverInfo.Partitions.Add(partitionId);
+                    }
+                    break;
+                }
+            }
+
+            return reply.NewMaster;
+        }
 
         public string findMasterbyPartition(string partitionId)
         {

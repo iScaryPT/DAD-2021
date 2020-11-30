@@ -414,6 +414,7 @@ namespace ServerSP
                 if (server.Name.Equals(request.DeadMasterId))
                 {
                     serversinfo.Remove(server);
+                    break;
                 }
             }
 
@@ -560,6 +561,18 @@ namespace ServerSP
             }
 
             return Task.FromResult(new ListServerReply { Objects = res });
+        }
+        public override Task<NewPartitionMasterReply> GiveNewPartitionMaster(NewPartitionMasterRequest request, ServerCallContext context)
+        {
+            foreach(ServerInfo serverInfo in serversinfo)
+            {
+                if (serverInfo.Master.Contains(request.PartitionId))
+                {
+                    return Task.FromResult(new NewPartitionMasterReply { NewMaster = serverInfo.Url });
+                }
+            }
+
+            return Task.FromResult(new NewPartitionMasterReply { });
         }
         
         public override Task<FreezeReply> Freeze(FreezeRequest request, ServerCallContext context)

@@ -14,6 +14,7 @@ service ServerService {
   rpc GetPartitionObjects (PartitionObjectsRequest) returns (PartitionObjectsReply);
   rpc UpdateMaster (UpdateMasteRequest) returns (UpdateMasterReply);
   rpc AnnounceNewMaster (AnnounceRequest) returns (AnnounceReply);
+  rpc GiveNewPartitionMaster (NewPartitionMasterRequest) returns (NewPartitionMasterReply);
 }
 
 message ServerObjectInfo {
@@ -103,3 +104,11 @@ message AnnounceRequest {
 	repeated string newMasterPartitions = 3;
 }
 message AnnounceReply {}
+
+message NewPartitionMasterRequest {
+	string partitionId = 1;
+}
+
+message NewPartitionMasterReply {
+	string newMaster = 1;
+}
