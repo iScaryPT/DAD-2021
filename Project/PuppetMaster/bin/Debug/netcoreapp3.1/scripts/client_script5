@@ -1,0 +1,21 @@
+write p1 o2 "p1-o2-v1"
+read p2 o5 -1
+read p2 o6 -1
+read p1 o2 s3
+listServer s1
+listServer s3
+listGlobal
+write p3 o2 "p1-o2-v1"
+read p3 o5 -1
+read p3 o6 -1
+read p1 o2 s3
+listServer s1
+listServer s3
+listGlobal
+write p4 o2 "p1-o2-v1"
+read p2 o5 -1
+read p6 o6 -1
+read p4 o2 s3
+listServer s8
+listServer s6
+listGlobal

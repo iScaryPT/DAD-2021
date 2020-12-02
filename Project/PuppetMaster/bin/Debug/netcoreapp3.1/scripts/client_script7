@@ -1,0 +1,45 @@
+write p6 o1 "p6-o1-v1"
+read p6 o1 -1
+read p7 o1 -1
+listServer s6
+wait 3000
+begin-repeat 5
+write p7 o$i "p7-o$i-v1"
+wait 1000
+end-repeat
+write p8 o6 "p8-o6-v1"
+listGlobal
+write p10 o70 "p10-o70-v1"
+read p8 o70 -1
+read p6 o1 -1
+listServer s1
+wait 30
+begin-repeat 5
+write p4 o$i "p4-o$i-v1"
+wait 1000
+end-repeat
+write p6 o6 "p6-o6-v1"
+listGlobal
+write p9 o1 "p9-o1-v1"
+read p9 o1 -1
+read p9 o1 -1
+listServer s1
+wait 3000
+begin-repeat 5
+write p10 o$i "p10-o$i-v1"
+wait 1000
+end-repeat
+write p3 o6 "p3-o6-v1"
+listGlobal
+write p3 o71 "p3-o71-v1"
+read p8 o70 -1
+read p6 o1 -1
+listServer s1
+wait 30
+begin-repeat 5
+write p4 o$i "p4-o$i-v1"
+wait 1000
+end-repeat
+write p6 o6 "p6-o6-v1"
+listGlobal
+

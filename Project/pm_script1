@@ -1,11 +1,24 @@
 ReplicationFactor 3
 Partition 3 p1 s1 s2 s3
 Partition 3 p2 s2 s4 s5
+Partition 3 p3 s11 s12 s3
+Partition 3 p4 s12 s14 s5
+Partition 3 p5 s11 s2 s13
+Partition 3 p6 s12 s4 s15
+Partition 3 p7 s1 s12 s3
+Partition 3 p8 s2 s14 s5
+Partition 3 p9 s1 s2 s13
+Partition 3 p10 s2 s4 s15
 Server s1 http://localhost:2001 0 0
 Server s2 http://localhost:2002 0 0
-Server s3 http://localhost:2003 0 0	
-Server s4 http://localhost:2004 0 0	
-Server s5 http://localhost:2005 0 0	
+Server s3 http://localhost:2003 20 30	
+Server s4 http://localhost:2004 20 30	
+Server s5 http://localhost:2005 20 30	
+Server s11 http://localhost:2011 0 0
+Server s12 http://localhost:2012 40 500
+Server s13 http://localhost:2013 40 500	
+Server s14 http://localhost:2014 40 500	
+Server s15 http://localhost:2015 0 0	
 Wait 3000
 Client c1 http://localhost:3001 client_script1
 Status
@@ -15,5 +28,24 @@ Client c2 http://localhost:3002 client_script2
 Wait 5000
 Crash s5
 Client c3 http://localhost:3003 client_script3
+Wait 2000
+Status
+Client c1 http://localhost:3001 client_script4
+Status
+Wait 100
+Crash s11
+Client c2 http://localhost:3002 client_script5
+Wait 500000
+Client c3 http://localhost:3003 client_script6
+Wait 2000
+Status
+Client c1 http://localhost:3001 client_script7
+Status
+Wait 10000
+Crash s14
+Client c2 http://localhost:3002 client_script8
+Wait 5000
+Crash s2
+Client c3 http://localhost:3003 client_script9
 Wait 2000
 Status
