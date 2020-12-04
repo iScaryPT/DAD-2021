@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http.Headers;
-using System.Text;
-using ClientSP;
 using Grpc.Net.Client;
 
 namespace ClientLogicSP
 {
-
     class ClientLogic
     {
         private GrpcChannel channel;
@@ -22,7 +18,6 @@ namespace ClientLogicSP
             }
 
         }
-
         public void Connect(string host)
         {
 
@@ -37,7 +32,6 @@ namespace ClientLogicSP
             Console.WriteLine($"Changing server to {host} ....");
             serverUrl = host;
         }
-
         public string Read(string partitionId, string objectId, string serverId) {
             bool alternWorked = false;
             if (this.client == null)
@@ -68,7 +62,6 @@ namespace ClientLogicSP
 
                     this.channel = null;
                     this.client = null;
-                    //TODO Look better at this
                     int failedIdx = serversi.FindIndex(failed => failed.Url.Equals(this.serverUrl));
                     serversi[failedIdx].IsAvailable = false;
                     this.serverUrl = "";
@@ -76,7 +69,6 @@ namespace ClientLogicSP
                 }
             }
             
-
             if (response.Equals("N/A") && !serverId.Equals("-1"))
             {
                 string url = findServerbyId(serverId);
@@ -104,7 +96,6 @@ namespace ClientLogicSP
                             Console.WriteLine($"Server {this.serverUrl} not available.");
                             this.channel = null;
                             this.client = null;
-                            //removeServerUrlfromList(serverUrl);
                             int failedIdx = serversi.FindIndex(failed => failed.Url.Equals(this.serverUrl));
                             serversi[failedIdx].IsAvailable = false;
                             url = findAvailableServerByPartition(partitionId);
@@ -160,7 +151,6 @@ namespace ClientLogicSP
                     maxTries--;
                     string newMaster = newPartitionMaster(partitionId, this.serverUrl);
                     this.Connect(newMaster);
-                    //removeServerIdfromList(tmpUrl);
                 }
             }
 
@@ -204,13 +194,6 @@ namespace ClientLogicSP
         {
             channel.ShutdownAsync().Wait();
         }
-        /*
-        public void freeze(string server)
-        {
-            FreezeReply reply = client.Freeze(new FreezeRequest { });
-        }
-        */
-
         public string newPartitionMaster(string partitionId, string oldMaster)
         {
 
@@ -243,7 +226,6 @@ namespace ClientLogicSP
 
             return reply.NewMaster;
         }
-
         public string findMasterbyPartition(string partitionId)
         {
             foreach(ServerInfo sinfo in serversi)
@@ -257,7 +239,6 @@ namespace ClientLogicSP
 
             return "";
         }
-
         public string findServerbyId(string serverid)
         {
             foreach (ServerInfo sinfo in serversi)
@@ -282,27 +263,6 @@ namespace ClientLogicSP
 
             return null;
         }
-
-    
-        public void removeServerUrlfromList(string url)
-        {
-            string serverid = "";
-            foreach (ServerInfo si in serversi){
-                if (si.Url.Equals(url)){
-                    serverid = si.Name;
-                    serversi.Remove(si);
-                }
-            }
-            foreach (ServerInfo si in serversi)
-            {
-                if (si.Partitions.Contains(serverid))
-                {
-                    si.Partitions.Remove(serverid);
-                }
-            }
-        }
-    
-    
     }
 
     class ServerInfo
@@ -333,7 +293,6 @@ namespace ClientLogicSP
             this.maxdelay = Int32.Parse(ser[5]);
             this.isAvailable = true;
         }
-
         public override string ToString()
         {
             Console.WriteLine("[ToString] start");
@@ -352,10 +311,8 @@ namespace ClientLogicSP
 
             Console.WriteLine(mindelay);
             Console.WriteLine(maxdelay);
-            //Console.WriteLine("[ToString] end");
             string end = "[ToString] end";
             return end;
         }
-
     }
 }

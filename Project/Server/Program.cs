@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Schema;
-using Google.Protobuf.Reflection;
 using Grpc.Core;
-using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
-using Newtonsoft.Json.Linq;
 
 namespace ServerSP
 {
@@ -86,7 +80,7 @@ namespace ServerSP
         ServerInfo myinfo;
         List<ServerInfo> serversinfo = new List<ServerInfo>();
         private object infoLock;
-        //works for establish a connection to all servers
+        //works to establish a connection to all servers
         private GrpcChannel channel;
         private ServerService.ServerServiceClient server;
         private bool isFreezing;
@@ -263,11 +257,9 @@ namespace ServerSP
                     newMasterUrl = potentialPartitionMasters[newMasterIdx];
                 }
                 
-                
-                //Send updated dictionary to new master
                 channel = GrpcChannel.ForAddress(newMasterUrl);
                 server = new ServerService.ServerServiceClient(channel);
-                //TODO: ERROR HANDLING
+                
                 Console.WriteLine($"Announcing  to  {newMasterUrl}  he is the new master ...");
                 server.UpdateMaster(new UpdateMasteRequest
                 {
@@ -334,7 +326,7 @@ namespace ServerSP
                         }
                         catch (Exception)
                         {
-                            Console.WriteLine($"Couldn't announce that i'm new master to {serverInfo.Url} ...");
+                            Console.WriteLine($"Couldn't announce that i'm the new master to {serverInfo.Url} ...");
                             int failedIdx = serversinfo.FindIndex(failed => failed.Url.Equals(serverInfo.Url));
                             serversinfo[failedIdx].IsAvailable = false;
                             channel.ShutdownAsync().Wait();
@@ -350,7 +342,7 @@ namespace ServerSP
 
         public void broadcastObjsToReplicas(Dictionary<(string, string), ServerObject> objs, string masterPartition)
         {
-            Console.WriteLine("Broadcasting the updates to my homies...");
+            Console.WriteLine("Broadcasting the updates to my replicas...");
             Console.WriteLine($"Time to update partition {masterPartition} ...");
             List<string> replicaUrls = findServersByPartition(masterPartition);
             foreach(string url in replicaUrls)

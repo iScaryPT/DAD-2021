@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using ClientLogicSP;
 
@@ -29,12 +26,10 @@ namespace ClientSP
 
             client = new ClientLogic(serverurls);
         }
-
         public int RepeatNum()
         {
             return this.repeat_num;
         }
-
         public void Read(string[] commandArgs) {
             if(commandArgs.Length != 4)
             {
@@ -45,7 +40,6 @@ namespace ClientSP
             
             Console.WriteLine($"Read response: {client.Read(commandArgs[1], commandArgs[2], commandArgs[3])}");
         }
-
         public void Write(string[] commandArgs) {
             if (commandArgs.Length < 4)
             {
@@ -60,7 +54,6 @@ namespace ClientSP
             value = value.Replace("\"", "");
             Console.WriteLine($"Write Status: {client.Write(commandArgs[1], commandArgs[2], value)}");
         }
-
         public void ListServer(string[] commandArgs) {
             if (commandArgs.Length != 2)
             {
@@ -71,10 +64,8 @@ namespace ClientSP
 
             try
             {
-                //Console.WriteLine("List Server OK");
                 string serverId = commandArgs[1];
                 Console.WriteLine(client.listServer(serverId));
-                //Call some function
             }
             catch (FormatException e)
             {
@@ -84,7 +75,6 @@ namespace ClientSP
             }
 
         }
-
         public void ListGlobal(string[] commandArgs) {
             if (commandArgs.Length != 1)
             {
@@ -94,8 +84,6 @@ namespace ClientSP
             }
             Console.WriteLine(client.listGlobal());
         }
-
-        //TODO exception handling for thread.sleep()
         public void Wait(string[] commandArgs) {
             if (commandArgs.Length != 2)
             {
@@ -116,7 +104,6 @@ namespace ClientSP
             }
             
         }
-
         public void Begin_repeat(string[] commandArgs) {
             if (commandArgs.Length != 2)
             {
@@ -137,8 +124,6 @@ namespace ClientSP
                 Console.WriteLine("Command error: invalid number format of milliseconds...");
             }
         }
-
-
         public void End_repeat(string[] commandArgs) {
             if (commandArgs.Length != 1)
             {
@@ -159,7 +144,6 @@ namespace ClientSP
                 
             }
         }
-
         public void parseCommand(string command)
         {
             string[] commandArgs = command.Split(" ");
@@ -176,8 +160,6 @@ namespace ClientSP
                 return;
             }
 
-
-            //Console.WriteLine("exec: " + command);
             switch (commandArgs[0])
             {
                 case "read":

@@ -16,7 +16,6 @@ namespace PuppetMasterSP
         List<string> server_info;
         List<string> general_cmds;
         Dictionary<string, string> parsedServerInfo;
-        //List<Process> serverProcesses;
         Dictionary<string, Process> serverProcesses;
         List<Process> clientProcesses;
         int partitionsN;
@@ -62,7 +61,6 @@ namespace PuppetMasterSP
                 }
             }
         }
-
         public void BuildServerInfo()
         {
             foreach (string info in this.server_info)
@@ -93,21 +91,13 @@ namespace PuppetMasterSP
                 this.parsedServerInfo[parsed[1]] = final;
             }
         }
-
-
         public void StartServersAsync()
         {
-            //Task.Run(() => Parallel.ForEach(this.parsedServerInfo.Values, server => runServerAsync(server)));
             Task.WhenAll(this.parsedServerInfo.Values.Select(server => Task.Run(() => runServerAsync(server))));
         }
 
         public Task<object> runServerAsync(string server)
         {
-            /* Async Test
-            for (int i = 0; i < 999999999; i++)
-                ;
-            */
-
             string cmdArgs = this.parsedServerInfo[server.Split("|")[0]];
             foreach (string s in this.parsedServerInfo.Values)
             {
@@ -135,8 +125,6 @@ namespace PuppetMasterSP
                 this.serverProcesses[server.Split("|")[0]] = p;
             }
 
-            
-
             return Task.FromResult(new object());
         }
 
@@ -156,7 +144,6 @@ namespace PuppetMasterSP
             cmdArgs += splitted[3] + " ";
             foreach (string s in parsedServerInfo.Values)
                 cmdArgs += s + " ";
-            //Console.WriteLine(cmdArgs);
 
             Process p = new Process
             {
@@ -193,7 +180,6 @@ namespace PuppetMasterSP
             client.Freeze(new FreezeRequest { });
 
             channel.ShutdownAsync().Wait();
-
         }
 
         public void UnFreezeAsync(string serverid)
@@ -209,7 +195,6 @@ namespace PuppetMasterSP
             client.UnFreeze(new UnFreezeRequest { });
 
             channel.ShutdownAsync().Wait();
-
         }
 
         public void executeCmdsAsync()
@@ -218,7 +203,6 @@ namespace PuppetMasterSP
             {
                 this.execute(command);
             }
-            
         }
 
         public void showStatus()
@@ -305,9 +289,7 @@ namespace PuppetMasterSP
                 puppetM.execute(cmd);
 
             }
-            
         }
     }
-
 }
 
