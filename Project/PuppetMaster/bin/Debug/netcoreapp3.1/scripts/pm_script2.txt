@@ -1,0 +1,21 @@
+ReplicationFactor 4
+Partition 4 p1 s7 s2 s5 s6
+Partition 4 p2 s2 s3 s4 s5
+Partition 4 p3 s1 s3 s4 s6
+Partition 4 p4 s6 s7 s4 s1
+Server s1 http://localhost:2001 0 0
+Server s2 http://localhost:2002 0 0
+Server s3 http://localhost:2003 0 0	
+Server s4 http://localhost:2004 0 0	
+Server s5 http://localhost:2005 0 0	
+Server s6 http://localhost:2006 0 0
+Server s7 http://localhost:2007 0 0
+Wait 5000
+Crash s1
+Client c2 http://localhost:3002 scripts/client_script2
+Wait 5000
+Crash s5
+Client c3 http://localhost:3003 scripts/client_script3
+Wait 5000
+Crash s7
+Status

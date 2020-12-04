@@ -200,7 +200,19 @@ namespace ClientLogicSP
             int randomServerIdx = (new Random()).Next(0, serversi.Count - 1);
             string informantUrl = serversi[randomServerIdx].Url;
             this.Connect(informantUrl);
-            NewPartitionMasterReply reply = this.client.GiveNewPartitionMaster(new NewPartitionMasterRequest { PartitionId = partitionId });
+
+            NewPartitionMasterReply reply = new NewPartitionMasterReply { };
+
+            while (true) {
+                try {
+                    reply = this.client.GiveNewPartitionMaster(new NewPartitionMasterRequest { PartitionId = partitionId });
+                    break;
+                } catch (Exception) {
+                    randomServerIdx = (new Random()).Next(0, serversi.Count - 1);
+                    informantUrl = serversi[randomServerIdx].Url;
+                    this.Connect(informantUrl);
+                }
+            }
             
             foreach(ServerInfo serverInfo in serversi)
             {

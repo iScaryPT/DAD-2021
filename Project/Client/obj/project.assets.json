@@ -2,10 +2,10 @@
   "version": 3,
   "targets": {
     ".NETCoreApp,Version=v3.1": {
-      "Google.Protobuf/3.13.0": {
+      "Google.Protobuf/3.14.0": {
         "type": "package",
         "dependencies": {
-          "System.Memory": "4.5.2",
+          "System.Memory": "4.5.3",
           "System.Runtime.CompilerServices.Unsafe": "4.5.2"
         },
         "compile": {
@@ -147,14 +147,14 @@
     }
   },
   "libraries": {
-    "Google.Protobuf/3.13.0": {
-      "sha512": "/6VgKCh0P59x/rYsBkCvkUanF0TeUYzwV9hzLIWgt23QRBaKHoxaaMkidEWhKibLR88c3PVCXyyrx9Xlb+Ne6w==",
+    "Google.Protobuf/3.14.0": {
+      "sha512": "9AkodyGNmLI+wJJPbwpWLmh4BMHoXDQ9+8qvDPhQQi/BNsleqKMBn3OlyLwC6CALwan2kc5+Cenb8fJSITX3nQ==",
       "type": "package",
-      "path": "google.protobuf/3.13.0",
+      "path": "google.protobuf/3.14.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "google.protobuf.3.13.0.nupkg.sha512",
+        "google.protobuf.3.14.0.nupkg.sha512",
         "google.protobuf.nuspec",
         "lib/net45/Google.Protobuf.dll",
         "lib/net45/Google.Protobuf.pdb",
@@ -424,7 +424,7 @@
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v3.1": [
-      "Google.Protobuf >= 3.13.0",
+      "Google.Protobuf >= 3.14.0",
       "Grpc.Core >= 2.33.1",
       "Grpc.Net.Client >= 2.33.1",
       "Grpc.Tools >= 2.33.1",
@@ -432,19 +432,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\diogo\\.nuget\\packages\\": {}
+    "C:\\Users\\pedro\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\diogo\\Desktop\\MEIC-T\\1ºAno\\1Semestre\\DAD\\Projeto\\DAD-2021\\Project\\Client\\Client.csproj",
+      "projectUniqueName": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Client\\Client.csproj",
       "projectName": "Client",
-      "projectPath": "C:\\Users\\diogo\\Desktop\\MEIC-T\\1ºAno\\1Semestre\\DAD\\Projeto\\DAD-2021\\Project\\Client\\Client.csproj",
-      "packagesPath": "C:\\Users\\diogo\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\diogo\\Desktop\\MEIC-T\\1ºAno\\1Semestre\\DAD\\Projeto\\DAD-2021\\Project\\Client\\obj\\",
+      "projectPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Client\\Client.csproj",
+      "packagesPath": "C:\\Users\\pedro\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Client\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\diogo\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\pedro\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -470,7 +470,7 @@
         "dependencies": {
           "Google.Protobuf": {
             "target": "Package",
-            "version": "[3.13.0, )"
+            "version": "[3.14.0, )"
           },
           "Grpc.Core": {
             "target": "Package",
@@ -506,7 +506,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.402\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
       }
     }
   }

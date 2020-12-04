@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\diogo\\Desktop\\MEIC-T\\1ºAno\\1Semestre\\DAD\\Projeto\\DAD-2021\\Project\\Client\\Client.csproj": {}
+    "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Client\\Client.csproj": {}
   },
   "projects": {
-    "C:\\Users\\diogo\\Desktop\\MEIC-T\\1ºAno\\1Semestre\\DAD\\Projeto\\DAD-2021\\Project\\Client\\Client.csproj": {
+    "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Client\\Client.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\diogo\\Desktop\\MEIC-T\\1ºAno\\1Semestre\\DAD\\Projeto\\DAD-2021\\Project\\Client\\Client.csproj",
+        "projectUniqueName": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Client\\Client.csproj",
         "projectName": "Client",
-        "projectPath": "C:\\Users\\diogo\\Desktop\\MEIC-T\\1ºAno\\1Semestre\\DAD\\Projeto\\DAD-2021\\Project\\Client\\Client.csproj",
-        "packagesPath": "C:\\Users\\diogo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\diogo\\Desktop\\MEIC-T\\1ºAno\\1Semestre\\DAD\\Projeto\\DAD-2021\\Project\\Client\\obj\\",
+        "projectPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Client\\Client.csproj",
+        "packagesPath": "C:\\Users\\pedro\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Client\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\diogo\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\pedro\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -40,7 +40,7 @@
           "dependencies": {
             "Google.Protobuf": {
               "target": "Package",
-              "version": "[3.13.0, )"
+              "version": "[3.14.0, )"
             },
             "Grpc.Core": {
               "target": "Package",
@@ -76,7 +76,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.402\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
         }
       }
     }

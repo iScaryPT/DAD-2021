@@ -2,10 +2,10 @@
   "version": 3,
   "targets": {
     ".NETCoreApp,Version=v3.1": {
-      "Google.Protobuf/3.13.0": {
+      "Google.Protobuf/3.14.0": {
         "type": "package",
         "dependencies": {
-          "System.Memory": "4.5.2",
+          "System.Memory": "4.5.3",
           "System.Runtime.CompilerServices.Unsafe": "4.5.2"
         },
         "compile": {
@@ -15,10 +15,10 @@
           "lib/netstandard2.0/Google.Protobuf.dll": {}
         }
       },
-      "Grpc.Core/2.33.1": {
+      "Grpc.Core/2.34.0": {
         "type": "package",
         "dependencies": {
-          "Grpc.Core.Api": "2.33.1",
+          "Grpc.Core.Api": "2.34.0",
           "System.Memory": "4.5.3"
         },
         "compile": {
@@ -28,33 +28,25 @@
           "lib/netstandard2.0/Grpc.Core.dll": {}
         },
         "runtimeTargets": {
-          "runtimes/linux/native/libgrpc_csharp_ext.x64.so": {
+          "runtimes/linux-x64/native/libgrpc_csharp_ext.x64.so": {
             "assetType": "native",
-            "rid": "linux"
+            "rid": "linux-x64"
           },
-          "runtimes/linux/native/libgrpc_csharp_ext.x86.so": {
+          "runtimes/osx-x64/native/libgrpc_csharp_ext.x64.dylib": {
             "assetType": "native",
-            "rid": "linux"
+            "rid": "osx-x64"
           },
-          "runtimes/osx/native/libgrpc_csharp_ext.x64.dylib": {
+          "runtimes/win-x64/native/grpc_csharp_ext.x64.dll": {
             "assetType": "native",
-            "rid": "osx"
+            "rid": "win-x64"
           },
-          "runtimes/osx/native/libgrpc_csharp_ext.x86.dylib": {
+          "runtimes/win-x86/native/grpc_csharp_ext.x86.dll": {
             "assetType": "native",
-            "rid": "osx"
-          },
-          "runtimes/win/native/grpc_csharp_ext.x64.dll": {
-            "assetType": "native",
-            "rid": "win"
-          },
-          "runtimes/win/native/grpc_csharp_ext.x86.dll": {
-            "assetType": "native",
-            "rid": "win"
+            "rid": "win-x86"
           }
         }
       },
-      "Grpc.Core.Api/2.33.1": {
+      "Grpc.Core.Api/2.34.0": {
         "type": "package",
         "dependencies": {
           "System.Memory": "4.5.3"
@@ -92,7 +84,7 @@
           "lib/netstandard2.1/Grpc.Net.Common.dll": {}
         }
       },
-      "Grpc.Tools/2.33.1": {
+      "Grpc.Tools/2.34.0": {
         "type": "package",
         "build": {
           "build/Grpc.Tools.props": {},
@@ -147,14 +139,14 @@
     }
   },
   "libraries": {
-    "Google.Protobuf/3.13.0": {
-      "sha512": "/6VgKCh0P59x/rYsBkCvkUanF0TeUYzwV9hzLIWgt23QRBaKHoxaaMkidEWhKibLR88c3PVCXyyrx9Xlb+Ne6w==",
+    "Google.Protobuf/3.14.0": {
+      "sha512": "9AkodyGNmLI+wJJPbwpWLmh4BMHoXDQ9+8qvDPhQQi/BNsleqKMBn3OlyLwC6CALwan2kc5+Cenb8fJSITX3nQ==",
       "type": "package",
-      "path": "google.protobuf/3.13.0",
+      "path": "google.protobuf/3.14.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "google.protobuf.3.13.0.nupkg.sha512",
+        "google.protobuf.3.14.0.nupkg.sha512",
         "google.protobuf.nuspec",
         "lib/net45/Google.Protobuf.dll",
         "lib/net45/Google.Protobuf.pdb",
@@ -167,17 +159,15 @@
         "lib/netstandard2.0/Google.Protobuf.xml"
       ]
     },
-    "Grpc.Core/2.33.1": {
-      "sha512": "fyPsiWAuhqMBE8c7BJsJmOitLW0vVwd32zHc5zunTGYj1RqGThPB+780E5Ddjk/X37b0lq2P4PAFNq+5VcUfhA==",
+    "Grpc.Core/2.34.0": {
+      "sha512": "A8QoX4TkOi9XcNUb70+ogPdGwH/BTSKZr1SoR64tABa+AGOWaVGirXPt8oU0OaPcwBHbKQ76rDJtXrWClE9MHw==",
       "type": "package",
-      "path": "grpc.core/2.33.1",
+      "path": "grpc.core/2.34.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "build/MonoAndroid10/Grpc.Core.targets",
-        "build/Xamarin.iOS10/Grpc.Core.targets",
         "build/net45/Grpc.Core.targets",
-        "grpc.core.2.33.1.nupkg.sha512",
+        "grpc.core.2.34.0.nupkg.sha512",
         "grpc.core.nuspec",
         "lib/net45/Grpc.Core.dll",
         "lib/net45/Grpc.Core.pdb",
@@ -188,27 +178,20 @@
         "lib/netstandard2.0/Grpc.Core.dll",
         "lib/netstandard2.0/Grpc.Core.pdb",
         "lib/netstandard2.0/Grpc.Core.xml",
-        "native/android/arm64-v8a/libgrpc_csharp_ext.so",
-        "native/android/armeabi-v7a/libgrpc_csharp_ext.so",
-        "native/android/x86/libgrpc_csharp_ext.so",
-        "native/ios/universal/libgrpc.a",
-        "native/ios/universal/libgrpc_csharp_ext.a",
-        "runtimes/linux/native/libgrpc_csharp_ext.x64.so",
-        "runtimes/linux/native/libgrpc_csharp_ext.x86.so",
-        "runtimes/osx/native/libgrpc_csharp_ext.x64.dylib",
-        "runtimes/osx/native/libgrpc_csharp_ext.x86.dylib",
-        "runtimes/win/native/grpc_csharp_ext.x64.dll",
-        "runtimes/win/native/grpc_csharp_ext.x86.dll"
+        "runtimes/linux-x64/native/libgrpc_csharp_ext.x64.so",
+        "runtimes/osx-x64/native/libgrpc_csharp_ext.x64.dylib",
+        "runtimes/win-x64/native/grpc_csharp_ext.x64.dll",
+        "runtimes/win-x86/native/grpc_csharp_ext.x86.dll"
       ]
     },
-    "Grpc.Core.Api/2.33.1": {
-      "sha512": "5uRHXXy0xJaiatd2b542jKemTkC5wR/27d2wVBBl0J5Nf/ubfZlrfCAX/hdQuLHoLPRnuYmf9iG2uXZfT2230w==",
+    "Grpc.Core.Api/2.34.0": {
+      "sha512": "TfxhML3GDy9Lo7Qk5Nax1ySGXNwxZQ3znVeV2n5SRHZC6EVoRSRy0foPAKrSgmyvrGlCdfsH4E2EmaLvCkNI2w==",
       "type": "package",
-      "path": "grpc.core.api/2.33.1",
+      "path": "grpc.core.api/2.34.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "grpc.core.api.2.33.1.nupkg.sha512",
+        "grpc.core.api.2.34.0.nupkg.sha512",
         "grpc.core.api.nuspec",
         "lib/net45/Grpc.Core.Api.dll",
         "lib/net45/Grpc.Core.Api.pdb",
@@ -257,10 +240,10 @@
         "packageIcon.png"
       ]
     },
-    "Grpc.Tools/2.33.1": {
-      "sha512": "jQgIvvcH/Gsggx+SXI1wDTLDdObf2H7RWptZhnafUrQk9hc/v0WhrBEEO8CSOevtI7stnWSWBb77wXUgcLyeHA==",
+    "Grpc.Tools/2.34.0": {
+      "sha512": "klDiY8Xv/VYxK4sLzqGRm3NOXf0IpCsM456g4175qWl/omg8h117Eqiq3ZtywtBAhyDLiLiJAhy9rb/tq9yvXQ==",
       "type": "package",
-      "path": "grpc.tools/2.33.1",
+      "path": "grpc.tools/2.34.0",
       "hasTools": true,
       "files": [
         ".nupkg.metadata",
@@ -289,7 +272,7 @@
         "build/native/include/google/protobuf/timestamp.proto",
         "build/native/include/google/protobuf/type.proto",
         "build/native/include/google/protobuf/wrappers.proto",
-        "grpc.tools.2.33.1.nupkg.sha512",
+        "grpc.tools.2.34.0.nupkg.sha512",
         "grpc.tools.nuspec",
         "tools/linux_x64/grpc_csharp_plugin",
         "tools/linux_x64/protoc",
@@ -424,27 +407,27 @@
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v3.1": [
-      "Google.Protobuf >= 3.13.0",
-      "Grpc.Core >= 2.33.1",
+      "Google.Protobuf >= 3.14.0",
+      "Grpc.Core >= 2.34.0",
       "Grpc.Net.Client >= 2.33.1",
-      "Grpc.Tools >= 2.33.1",
+      "Grpc.Tools >= 2.34.0",
       "Newtonsoft.Json >= 12.0.3"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\diogo\\.nuget\\packages\\": {}
+    "C:\\Users\\pedro\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\diogo\\Desktop\\MEIC-T\\1ºAno\\1Semestre\\DAD\\Projeto\\DAD-2021\\Project\\Server\\Server.csproj",
+      "projectUniqueName": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Server\\Server.csproj",
       "projectName": "Server",
-      "projectPath": "C:\\Users\\diogo\\Desktop\\MEIC-T\\1ºAno\\1Semestre\\DAD\\Projeto\\DAD-2021\\Project\\Server\\Server.csproj",
-      "packagesPath": "C:\\Users\\diogo\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\diogo\\Desktop\\MEIC-T\\1ºAno\\1Semestre\\DAD\\Projeto\\DAD-2021\\Project\\Server\\obj\\",
+      "projectPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Server\\Server.csproj",
+      "packagesPath": "C:\\Users\\pedro\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\pedro\\Desktop\\MEIC\\DAD\\DAD-2021\\Project\\Server\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\diogo\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\pedro\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -470,11 +453,11 @@
         "dependencies": {
           "Google.Protobuf": {
             "target": "Package",
-            "version": "[3.13.0, )"
+            "version": "[3.14.0, )"
           },
           "Grpc.Core": {
             "target": "Package",
-            "version": "[2.33.1, )"
+            "version": "[2.34.0, )"
           },
           "Grpc.Net.Client": {
             "target": "Package",
@@ -484,7 +467,7 @@
             "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
             "suppressParent": "All",
             "target": "Package",
-            "version": "[2.33.1, )"
+            "version": "[2.34.0, )"
           },
           "Newtonsoft.Json": {
             "target": "Package",
@@ -506,7 +489,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.402\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
       }
     }
   }
